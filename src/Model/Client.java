@@ -13,8 +13,9 @@ public class Client {
     private Socket connection;
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
+    private String clientName;
 
-    public Client(String host, int port){
+    public Client(String host, int port, String clientName){
         try {
             connection = new Socket(host, port);
             ois = new ObjectInputStream(connection.getInputStream());
@@ -22,6 +23,18 @@ public class Client {
         }catch (IOException e){
             e.printStackTrace();
         }
+
+        this.clientName = clientName;
+        // send client name to server
+        try {
+            send(clientName, Type.textMessage);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public Client(String host, int port){
+        this(host,port,"GhostUser");
     }
 
     public <T extends Serializable> void send(Message<T> message) throws IOException{
