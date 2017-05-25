@@ -25,6 +25,7 @@ public class Server {
         connectedUsers = new HashMap<Socket, String>();
         server = new ServerSocket(port);
         System.out.println("Start Server on port: "+port);
+        listenForClien();
     }
 
     private void listenForClien(){
@@ -35,8 +36,13 @@ public class Server {
                 Socket client = null;
                 while(true){
                     try {
+                        System.out.println("waiting for client...");
                         client = server.accept();
+                        System.out.println("client connected");
+                        ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+                        oos.flush();
                         ois = new ObjectInputStream(client.getInputStream());
+                        System.out.println("input stream obtained");
                     }catch (IOException e){
                         e.printStackTrace();
                     }
@@ -44,13 +50,14 @@ public class Server {
                     String name = "";
                     Message m = null;
                     try {
+                        System.out.println("waiting for username");
                         m = (Message) ois.readObject();
                     }catch (ClassNotFoundException e){
                         e.printStackTrace();
                     }catch (IOException e){
                         e.printStackTrace();
                     }
-                    if (m.getMessageType() == Type.fileMessage){
+                    if (m.getMessageType() == Type.textMessage){
                         name = (String) m.getContent();
                     }
                     else{
@@ -58,6 +65,7 @@ public class Server {
                     }
                     connectedUsers.put(client,name);
                     handleClient(client, name);
+                    System.out.println("Client connected and handle thread start");
                 }
             }
         });
@@ -104,7 +112,7 @@ public class Server {
                         for (Socket c: connectedUsers.keySet()) {
                             try {
                                 ObjectOutputStream oos = new ObjectOutputStream(c.getOutputStream());
-                                oos.writeObject(new Message<String>(Type.textMessage, "A file is sent"));
+                                oos.writeObject(new Message<String>("A file is sent", Type.textMessage));
                             } catch (SocketException e) {
                                 connectedUsers.remove(c);
                                 System.out.println("Remove a user from connectedUsers collection");
@@ -116,5 +124,13 @@ public class Server {
                 }
             }
         });
+    }
+
+    public static void main(String[] args) {
+        try {
+            Server s = new Server(1234);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }

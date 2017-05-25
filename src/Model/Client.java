@@ -18,8 +18,11 @@ public class Client {
     public Client(String host, int port, String clientName){
         try {
             connection = new Socket(host, port);
-            ois = new ObjectInputStream(connection.getInputStream());
+            System.out.println("Client connected");
             oos = new ObjectOutputStream(connection.getOutputStream());
+            oos.flush();
+            ois = new ObjectInputStream(connection.getInputStream());
+            System.out.println("streams");
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -40,10 +43,11 @@ public class Client {
     public <T extends Serializable> void send(Message<T> message) throws IOException{
         oos.writeObject(message);
         oos.flush();
+        System.out.println("Sent");
     }
 
     public <T extends Serializable> void send(T content, Type type) throws IOException{
-        send(new Message<T>(type,content));
+        send(new Message<T>(content, type));
     }
 
     public ObjectInputStream getInputStream() throws IOException{
