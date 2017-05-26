@@ -1,9 +1,6 @@
 package Model;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -11,17 +8,17 @@ import java.net.Socket;
  */
 public class Client {
     private Socket connection;
-    private ObjectInputStream ois;
-    private ObjectOutputStream oos;
+    private DataOutputStream dos;
+    private DataInputStream dis;
     private String clientName;
 
     public Client(String host, int port, String clientName){
         try {
             connection = new Socket(host, port);
             System.out.println("Client connected");
-            oos = new ObjectOutputStream(connection.getOutputStream());
-            oos.flush();
-            ois = new ObjectInputStream(connection.getInputStream());
+            dos = new DataOutputStream(connection.getOutputStream());
+            dos.flush();
+            dis = new DataInputStream(connection.getInputStream());
             System.out.println("streams");
         }catch (IOException e){
             e.printStackTrace();
@@ -40,24 +37,35 @@ public class Client {
         this(host,port,"GhostUser");
     }
 
-    public <T extends Serializable> void send(Message<T> message) throws IOException{
-        oos.writeObject(message);
-        oos.flush();
+    public void send(Message message) throws IOException{
+        dos.writeUTF(message.toString());
+        dos.flush();
         System.out.println("Sent");
     }
 
-    public <T extends Serializable> void send(T content, Type type) throws IOException{
-        send(new Message<T>(content, type));
+    public void send(String content, Type type) throws IOException{
+        send(new Message(content, type));
     }
 
     public ObjectInputStream getInputStream() throws IOException{
-        return new ObjectInputStream(ois);
+        return new ObjectInputStream(dis);
     }
 
     public void close() throws IOException{
-        ois.close();
-        oos.close();
+        dis.close();
+        dos.close();
         connection.close();
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public static void main(String[] args) throws Exception{
+        // todo: remove this
+        // this is for test
+        Client user = new Client("localhost",1234, "Farbod");
+        System.out.println("Client connected");
     }
 
 }

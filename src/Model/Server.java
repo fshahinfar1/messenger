@@ -1,9 +1,6 @@
 package Model;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -32,40 +29,40 @@ public class Server {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                ObjectInputStream ois = null;
+                DataInputStream dis = null;
                 Socket client = null;
                 while(true){
                     try {
                         System.out.println("waiting for client...");
                         client = server.accept();
                         System.out.println("client connected");
-                        ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
-                        oos.flush();
-                        ois = new ObjectInputStream(client.getInputStream());
-                        System.out.println("input stream obtained");
+                        // getting user name
+                        dis = new DataInputStream(client.getInputStream());
+//                        System.out.println("input stream obtained");
                     }catch (IOException e){
                         e.printStackTrace();
                     }
 
                     String name = "";
-                    Message m = null;
+                    Message message = null;
                     try {
-                        System.out.println("waiting for username");
-                        m = (Message) ois.readObject();
-                    }catch (ClassNotFoundException e){
-                        e.printStackTrace();
+//                        System.out.println("waiting for username");
+                        String m = dis.readUTF();
+                        message = new Message(m);
                     }catch (IOException e){
                         e.printStackTrace();
+                        System.out.println("connecting problem, didn't get username");
+                        continue;
                     }
-                    if (m.getMessageType() == Type.textMessage){
-                        name = (String) m.getContent();
+                    if (message.getMessageType() == Type.textMessage){
+                        name = message.getContent();
                     }
                     else{
                         throw new RuntimeException("clientName Not recieved");
                     }
                     connectedUsers.put(client,name);
                     handleClient(client, name);
-                    System.out.println("Client connected and handle thread start");
+                    System.out.println("Client connected and handle thread started");
                 }
             }
         });
@@ -76,30 +73,33 @@ public class Server {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                ObjectInputStream ois = null;
+                DataInputStream dis = null;
                 Message message = null;
                 try {
-                   ois = new ObjectInputStream(client.getInputStream());
-
+                   dis = new DataInputStream(client.getInputStream());
                 }catch (IOException e){
                     e.printStackTrace();
                 }
                 while(true){
                     try {
-                        message = (Message) ois.readObject();
-                    }catch (ClassNotFoundException e){
-                        e.printStackTrace();
+                        message = new Message(dis.readUTF());
+                        if(message == null){
+                            System.out.println("A client handler thread went down");
+                            break;
+                        }
                     }catch (SocketException e) {
                         System.out.println("A client handler thread went down");
                         break;
                     }catch (IOException e){
-                        e.printStackTrace();
+//                        e.printStackTrace();
+                        System.out.println("A client handler thread went down");
+                        break;
                     }
                     if(message.getMessageType() == Type.textMessage){
                         for (Socket c: connectedUsers.keySet()){
                             try {
-                                ObjectOutputStream oos = new ObjectOutputStream(c.getOutputStream());
-                                oos.writeObject(message);
+                                DataOutputStream dos = new DataOutputStream(c.getOutputStream());
+                                dos.writeUTF(message.toString());
                             }catch (SocketException e){
                                 connectedUsers.remove(c);
                                 System.out.println("Remove a user from connectedUsers collection");
@@ -111,8 +111,8 @@ public class Server {
                         // todo: send the file
                         for (Socket c: connectedUsers.keySet()) {
                             try {
-                                ObjectOutputStream oos = new ObjectOutputStream(c.getOutputStream());
-                                oos.writeObject(new Message<String>("A file is sent", Type.textMessage));
+                                DataOutputStream dos = new DataOutputStream(c.getOutputStream());
+                                dos.writeUTF(new Message("A file is sent", Type.textMessage).toString());
                             } catch (SocketException e) {
                                 connectedUsers.remove(c);
                                 System.out.println("Remove a user from connectedUsers collection");
