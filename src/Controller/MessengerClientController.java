@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URL;
@@ -32,25 +33,25 @@ public class MessengerClientController implements Initializable {
     // todo: it should not initialize here
     // it should be when user log in
     private Client user;
-    private ObjectInputStream ois;
+    private DataInputStream dis;
     private ExecutorService executor;
 
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        System.out.println("Attempting...");
+//        System.out.println("Attempting...");
         user = new Client("localhost",1234, "Farbod");
         System.out.println("connected to server");
         // todo: it should not initialize here
         try{
-            ois = user.getInputStream();
+            dis = user.getInputStream();
         }catch(IOException e){
             e.printStackTrace();
         }
-        System.out.println("Got input Stream");
         executor = Executors.newFixedThreadPool(1);
         listenForServer();  // start listen for server
         System.out.println("listening on servers port");
+
         // send button
         sendButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -73,9 +74,7 @@ public class MessengerClientController implements Initializable {
                 Message message = null;
                 while(true){
                     try{
-                        message = (Message) ois.readObject();
-                    }catch(ClassNotFoundException e){
-                        e.printStackTrace();
+                        message = new Message(dis.readUTF());
                     }catch (IOException e){
                         e.printStackTrace();
                     }

@@ -3,6 +3,7 @@ package Model;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+// simple json library is a dependency now
 
 public class Message{
 
@@ -28,8 +29,12 @@ public class Message{
         }
     }
 
-    public Type getMessageType(){
-        return Type.valueOf((String) message.get("type"));
+    public Type getMessageType() throws RuntimeException{
+        Type t = Type.valueOf((String) message.get("type"));
+        if(t == null)
+            new RuntimeException("Type is invalid");
+        return t;
+
     }
 
     public String getContent(){

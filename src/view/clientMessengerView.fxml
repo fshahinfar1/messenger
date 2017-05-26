@@ -6,44 +6,38 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-
-<AnchorPane fx:controller="Controller.MessengerClientController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MessengerClientController">
+   <columnConstraints>
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="479.0" minWidth="10.0" prefWidth="479.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="293.0" minWidth="10.0" prefWidth="121.0" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints maxHeight="221.0" minHeight="0.0" prefHeight="25.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="260.0" minHeight="10.0" prefHeight="235.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="188.0" minHeight="10.0" prefHeight="140.0" vgrow="SOMETIMES" />
+   </rowConstraints>
    <children>
-      <MenuBar layoutX="31.0" layoutY="34.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
-            <items>
-              <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
+      <MenuBar prefHeight="28.0" prefWidth="479.0" GridPane.columnSpan="2147483647">
+         <menus>
+            <Menu mnemonicParsing="false" text="File">
+               <items>
+                  <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
+               </items>
+            </Menu>
+            <Menu mnemonicParsing="false" text="Help">
+               <items>
+                  <MenuItem fx:id="aboutMenuItem" mnemonicParsing="false" text="About" />
+               </items>
+            </Menu>
+         </menus>
       </MenuBar>
-      <GridPane layoutY="26.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="479.0" minWidth="10.0" prefWidth="479.0" />
-          <ColumnConstraints hgrow="SOMETIMES" maxWidth="293.0" minWidth="10.0" prefWidth="121.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints maxHeight="221.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="242.0" minHeight="10.0" prefHeight="230.0" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="188.0" minHeight="10.0" prefHeight="140.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <Button fx:id="sendButton" mnemonicParsing="false" prefHeight="200.0" prefWidth="121.0" text="send" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <TextArea fx:id="chatTextArea" prefHeight="200.0" prefWidth="200.0" promptText="chat here" GridPane.rowIndex="2" />
-            <ListView fx:id="usersListView" prefHeight="189.0" prefWidth="121.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <TextArea fx:id="messageTextArea" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" />
-         </children>
-      </GridPane>
+      <Button fx:id="sendButton" mnemonicParsing="false" prefHeight="200.0" prefWidth="121.0" text="send" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <TextArea fx:id="chatTextArea" prefHeight="200.0" prefWidth="200.0" promptText="chat here" GridPane.rowIndex="2" />
+      <ListView fx:id="usersListView" prefHeight="189.0" prefWidth="121.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <TextArea fx:id="messageTextArea" editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" />
    </children>
-</AnchorPane>
+</GridPane>
