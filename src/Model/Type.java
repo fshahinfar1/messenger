@@ -5,5 +5,7 @@ package Model;
  */
 public enum Type{
     textMessage,
-    fileMessage;
+    fileMessage,
+    clientRequestUserList;
+
 }

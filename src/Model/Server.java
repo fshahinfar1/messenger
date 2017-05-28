@@ -1,5 +1,7 @@
 package Model;
 
+import org.json.simple.JSONArray;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -16,16 +18,17 @@ public class Server {
     private ServerSocket server;
     private ExecutorService executor;
     private HashMap<Socket,String> connectedUsers;
+    private String lastUserName;
 
     public Server(int port) throws IOException{
         executor = Executors.newCachedThreadPool();
         connectedUsers = new HashMap<Socket, String>();
         server = new ServerSocket(port);
         System.out.println("Start Server on port: "+port);
-        listenForClien();
+        listenForClient();
     }
 
-    private void listenForClien(){
+    private void listenForClient(){
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -56,6 +59,7 @@ public class Server {
                     }
                     if (message.getMessageType() == Type.textMessage){
                         name = message.getContent();
+                        System.out.println(name);
                     }
                     else{
                         throw new RuntimeException("clientName Not recieved");
@@ -81,6 +85,8 @@ public class Server {
                     e.printStackTrace();
                 }
                 while(true){
+
+                    // get a message from client
                     try {
                         message = new Message(dis.readUTF());
                         if(message == null){
@@ -95,35 +101,46 @@ public class Server {
                         System.out.println("A client handler thread went down");
                         break;
                     }
+
+                    if(lastUserName != name) {
+                        sendToAll("-" + name + ":\n");
+                        lastUserName = name;
+                    }
+
+                    //send message to all clients
                     if(message.getMessageType() == Type.textMessage){
-                        for (Socket c: connectedUsers.keySet()){
-                            try {
-                                DataOutputStream dos = new DataOutputStream(c.getOutputStream());
-                                dos.writeUTF(message.toString());
-                            }catch (SocketException e){
-                                connectedUsers.remove(c);
-                                System.out.println("Remove a user from connectedUsers collection");
-                            }catch (IOException e){
-                                e.printStackTrace();
-                            }
-                        }
+                        sendToAll(message);
                     }else if(message.getMessageType() == Type.fileMessage){
                         // todo: send the file
-                        for (Socket c: connectedUsers.keySet()) {
-                            try {
-                                DataOutputStream dos = new DataOutputStream(c.getOutputStream());
-                                dos.writeUTF(new Message("A file is sent", Type.textMessage).toString());
-                            } catch (SocketException e) {
-                                connectedUsers.remove(c);
-                                System.out.println("Remove a user from connectedUsers collection");
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                        sendToAll("A file is sent");
+                    }else if(message.getMessageType() == Type.clientRequestUserList){
+                        JSONArray users = new JSONArray();
+                        for(String clientName : connectedUsers.values())
+                            users.add(clientName);
+                        System.out.println(users.toString());
+                        sendToAll(new Message(users.toString(),Type.clientRequestUserList));
                     }
                 }
             }
         });
+    }
+
+    private void sendToAll(Message message){
+        for (Socket c: connectedUsers.keySet()){
+            try {
+                DataOutputStream dos = new DataOutputStream(c.getOutputStream());
+                dos.writeUTF(message.toString());
+            }catch (SocketException e){
+                connectedUsers.remove(c);
+                System.out.println("Remove a user from connectedUsers collection");
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void sendToAll(String message){
+        sendToAll(new Message(message, Type.textMessage));
     }
 
     public static void main(String[] args) {
