@@ -5,12 +5,14 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MessengerClientController">
+<GridPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MessengerClientController">
    <columnConstraints>
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="479.0" minWidth="10.0" prefWidth="479.0" />
       <ColumnConstraints hgrow="SOMETIMES" maxWidth="293.0" minWidth="10.0" prefWidth="121.0" />
@@ -35,9 +37,13 @@
             </Menu>
          </menus>
       </MenuBar>
+      <ScrollPane fx:id="messageScrollPane" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="232.0" prefWidth="477.0" />
+        </content>
+      </ScrollPane>
       <Button fx:id="sendButton" mnemonicParsing="false" prefHeight="200.0" prefWidth="121.0" text="send" GridPane.columnIndex="1" GridPane.rowIndex="2" />
       <TextArea fx:id="chatTextArea" prefHeight="200.0" prefWidth="200.0" promptText="chat here" GridPane.rowIndex="2" />
       <ListView fx:id="usersListView" prefHeight="189.0" prefWidth="121.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-      <TextArea fx:id="messageTextArea" editable="false" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" />
    </children>
 </GridPane>

@@ -31,8 +31,6 @@ public class MessengerClientController implements Initializable {
     @FXML
     private TextArea chatTextArea;
     @FXML
-    private TextArea messageTextArea;
-    @FXML
     private ListView usersListView;
 
     // todo: it should not initialize here
@@ -90,7 +88,7 @@ public class MessengerClientController implements Initializable {
                         e.printStackTrace();
                     }
                     if(message.getMessageType() == Type.textMessage){
-                        messageTextArea.setText(messageTextArea.getText()+message.getContent());
+                        // show message
                     }else if(message.getMessageType() == Type.clientRequestUserList){
                         String arrayString = message.getContent();
                         try {
