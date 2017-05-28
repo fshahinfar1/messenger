@@ -4,6 +4,7 @@ import Model.Client;
 import Model.Message;
 import Model.Type;
 import com.sun.javafx.collections.ObservableListWrapper;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -11,14 +12,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
+import javafx.scene.control.Label;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -32,6 +33,8 @@ public class MessengerClientController implements Initializable {
     private TextArea chatTextArea;
     @FXML
     private ListView usersListView;
+    @FXML
+    private VBox messageVBox;
 
     // todo: it should not initialize here
     // it should be when user log in
@@ -42,7 +45,7 @@ public class MessengerClientController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        user = new Client("localhost",1234, "Farnad");
+        user = new Client("localhost",1234, "Farbod");
         System.out.println("connected to server");
         // todo: it should not initialize here
         try{
@@ -71,7 +74,7 @@ public class MessengerClientController implements Initializable {
                 }catch (IOException e){
                     e.printStackTrace();
                 }
-                chatTextArea.setText("");
+                chatTextArea.clear();
             }
         });
     }
@@ -89,6 +92,17 @@ public class MessengerClientController implements Initializable {
                     }
                     if(message.getMessageType() == Type.textMessage){
                         // show message
+                        Label messageLabel = new Label(message.getContent());
+                        try {
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    messageVBox.getChildren().add(messageLabel);
+                                }
+                            });
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                     }else if(message.getMessageType() == Type.clientRequestUserList){
                         String arrayString = message.getContent();
                         try {
@@ -102,6 +116,17 @@ public class MessengerClientController implements Initializable {
                 }
             }
         });
+
+    }
+
+    public void beforeClose(){
+        executor.shutdownNow();
+        try {
+            dis.close();
+            user.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
 
     }
 }

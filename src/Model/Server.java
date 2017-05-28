@@ -20,12 +20,16 @@ public class Server {
     private HashMap<Socket,String> connectedUsers;
     private String lastUserName;
 
+    private boolean flagRun;
+
     public Server(int port) throws IOException{
         executor = Executors.newCachedThreadPool();
         connectedUsers = new HashMap<Socket, String>();
         server = new ServerSocket(port);
         System.out.println("Start Server on port: "+port);
+        flagRun = true;
         listenForClient();
+
     }
 
     private void listenForClient(){
@@ -34,7 +38,7 @@ public class Server {
             public void run() {
                 DataInputStream dis = null;
                 Socket client = null;
-                while(true){
+                while(flagRun){
                     try {
                         System.out.println("waiting for client...");
                         client = server.accept();
@@ -45,7 +49,6 @@ public class Server {
                     }catch (IOException e){
                         e.printStackTrace();
                     }
-
                     String name = "";
                     Message message = null;
                     try {
@@ -83,16 +86,14 @@ public class Server {
                    dis = new DataInputStream(client.getInputStream());
                 }catch (IOException e){
                     e.printStackTrace();
+                    System.err.println("couldn't stablish DataInputStream connection");
+                    return;
                 }
                 while(true){
 
                     // get a message from client
                     try {
                         message = new Message(dis.readUTF());
-                        if(message == null){
-                            System.out.println("A client handler thread went down");
-                            break;
-                        }
                     }catch (SocketException e) {
                         System.out.println("A client handler thread went down");
                         break;
@@ -101,28 +102,30 @@ public class Server {
                         System.out.println("A client handler thread went down");
                         break;
                     }
-
-                    if(lastUserName != name) {
-                        sendToAll("-" + name + ":\n");
-                        lastUserName = name;
-                    }
-
                     //send message to all clients
                     if(message.getMessageType() == Type.textMessage){
+                        checkLastUser(name);
                         sendToAll(message);
                     }else if(message.getMessageType() == Type.fileMessage){
                         // todo: send the file
+                        checkLastUser(name);
                         sendToAll("A file is sent");
                     }else if(message.getMessageType() == Type.clientRequestUserList){
                         JSONArray users = new JSONArray();
-                        for(String clientName : connectedUsers.values())
-                            users.add(clientName);
+                        users.addAll(connectedUsers.values());
                         System.out.println(users.toString());
                         sendToAll(new Message(users.toString(),Type.clientRequestUserList));
                     }
                 }
             }
         });
+    }
+
+    private void checkLastUser(String name){
+        if(lastUserName != name) {
+            sendToAll("-" + name + ":\n");
+            lastUserName = name;
+        }
     }
 
     private void sendToAll(Message message){
