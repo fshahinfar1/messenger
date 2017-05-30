@@ -12,7 +12,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception{
 //        System.out.println("main");
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/clientMessengerView.fxml"));
+//        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/clientMessengerView.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/clientMessengerLogin.fxml"));
 //        System.out.println("init");
         Parent root = fxmlLoader.load();
 //        System.out.println("load");

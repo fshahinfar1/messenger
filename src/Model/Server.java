@@ -1,6 +1,9 @@
 package Model;
 
+import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -115,6 +118,19 @@ public class Server {
                         users.addAll(connectedUsers.values());
                         System.out.println(users.toString());
                         sendToAll(new Message(users.toString(),Type.clientRequestUserList));
+                    }else if(message.getMessageType() == Type.loginRequest){
+                        // todo: working here
+                        try {
+                            JSONObject loginRequestMessage = (JSONObject) new JSONParser().parse(message.getContent());
+                            String userName = (String) loginRequestMessage.get("userName");
+                            String password = (String) loginRequestMessage.get("password");
+                            System.out.println("user: "+userName+" pass: "+password);
+                            sendTo(new Message("ACCEPTED", Type.loginRequest), client);
+                        }catch (ParseException e){
+                            System.err.println("couldn't get username and password due to parse issue");
+                            e.printStackTrace();
+                            sendTo(new Message("FAILED", Type.loginRequest), client);
+                        }
                     }
                 }
             }
@@ -144,6 +160,22 @@ public class Server {
 
     private void sendToAll(String message){
         sendToAll(new Message(message, Type.textMessage));
+    }
+
+    private void sendTo(Message message, Socket c){
+        try {
+            DataOutputStream dos = new DataOutputStream(c.getOutputStream());
+            dos.writeUTF(message.toString());
+        }catch (SocketException e){
+            connectedUsers.remove(c);
+            System.out.println("Remove a user from connectedUsers collection");
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendTo(String message, Socket c){
+        sendTo(new Message(message, Type.textMessage), c);
     }
 
     public static void main(String[] args) {

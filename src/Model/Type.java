@@ -6,6 +6,7 @@ package Model;
 public enum Type{
     textMessage,
     fileMessage,
-    clientRequestUserList;
+    clientRequestUserList,
+    loginRequest;
 
 }
