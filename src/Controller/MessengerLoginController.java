@@ -64,9 +64,9 @@ public class MessengerLoginController implements Initializable {
                     Message message = new Message(dis.readUTF());
                     if(message.getMessageType()==Type.loginRequest) {
                         if (message.getContent().equals("ACCEPTED")) {
-                            System.out.println("+++++++");
+                            System.out.println("login accepted");
                         } else {
-                            System.out.println("-------");
+                            System.out.println(message.getContent());
                         }
                     }
                 }catch (IOException e){
