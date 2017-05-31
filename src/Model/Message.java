@@ -30,9 +30,10 @@ public class Message{
     }
 
     public Type getMessageType() throws RuntimeException{
+        // todo: what is the null story here
         Type t = Type.valueOf((String) message.get("type"));
         if(t == null)
-            new RuntimeException("Type is invalid");
+            throw new RuntimeException("Type is invalid");
         return t;
 
     }

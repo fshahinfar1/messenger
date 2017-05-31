@@ -36,31 +36,46 @@ public class MessengerClientController implements Initializable {
     @FXML
     private VBox messageVBox;
 
-    // todo: it should not initialize here
-    // it should be when user log in
     private Client user;
     private DataInputStream dis;
     private ExecutorService executor;
 
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        user = new Client("localhost",1234, "Farbod");
-        System.out.println("connected to server");
-        // todo: it should not initialize here
-        try{
-            dis = user.getInputStream();
-        }catch(IOException e){
+    public MessengerClientController(Client u) throws RuntimeException {
+
+        if (u.isClosed() || u == null) {
+            throw new RuntimeException("null client");
+        }
+
+        this.user = u;
+
+        try {
+            this.dis = new DataInputStream(u.getInputStream());
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
         executor = Executors.newFixedThreadPool(1);
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+//        user = new Client("localhost",1234, "Farbod");
+//        System.out.println("connected to server");
+//        // todo: it should not initialize here
+//        try{
+//            dis = user.getInputStream();
+//        }catch(IOException e){
+//            e.printStackTrace();
+//        }
+//        executor = Executors.newFixedThreadPool(1);
         listenForServer();  // start listen for server
         System.out.println("listening on servers port");
 
         // get users
         try {
             user.send("GET", Type.clientRequestUserList);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -68,10 +83,10 @@ public class MessengerClientController implements Initializable {
         sendButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                String text = chatTextArea.getText()+"\n";
+                String text = chatTextArea.getText() + "\n";
                 try {
                     user.send(text, Type.textMessage);
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 chatTextArea.clear();
@@ -79,18 +94,18 @@ public class MessengerClientController implements Initializable {
         });
     }
 
-    private void listenForServer(){
+    private void listenForServer() {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 Message message = null;
-                while(true){
-                    try{
+                while (true) {
+                    try {
                         message = new Message(dis.readUTF());
-                    }catch (IOException e){
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    if(message.getMessageType() == Type.textMessage){
+                    if (message.getMessageType() == Type.textMessage) {
                         // show message
                         Label messageLabel = new Label(message.getContent());
                         try {
@@ -100,15 +115,15 @@ public class MessengerClientController implements Initializable {
                                     messageVBox.getChildren().add(messageLabel);
                                 }
                             });
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    }else if(message.getMessageType() == Type.clientRequestUserList){
+                    } else if (message.getMessageType() == Type.clientRequestUserList) {
                         String arrayString = message.getContent();
                         try {
                             JSONArray arr = (JSONArray) new JSONParser().parse(arrayString);
                             usersListView.setItems(new ObservableListWrapper(arr));
-                        }catch (ParseException e){
+                        } catch (ParseException e) {
                             System.out.println("couldn't parse");
                             System.out.println(arrayString);
                         }
@@ -119,14 +134,33 @@ public class MessengerClientController implements Initializable {
 
     }
 
-    public void beforeClose(){
+    public void beforeClose() {
         executor.shutdownNow();
         try {
             dis.close();
             user.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    protected void setUser(Client u) {
+        if (u.isClosed() || u == null) {
+            throw new RuntimeException("null client");
+        }
+        user = u;
+        try {
+            dis = new DataInputStream(user.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void setDIS(DataInputStream d) {
+        if (dis == null) {
+            throw new RuntimeException("null DIS");
+        }
+        dis = d;
     }
 }

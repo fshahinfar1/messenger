@@ -67,4 +67,8 @@ public class Client {
         System.out.println("Client connected");
     }
 
+    public boolean isClosed(){
+        return connection.isClosed();
+    }
+
 }
