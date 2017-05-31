@@ -15,6 +15,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.stage.WindowEvent;
 import org.json.simple.JSONObject;
 
 import java.io.DataInputStream;
@@ -82,6 +83,13 @@ public class MessengerLoginController implements Initializable {
                             Scene scene = new Scene(root, 600, 400);
                             Main.stage.setScene(scene);
                             Main.stage.show();
+                            // set the behavior for exit
+                            Main.stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                                @Override
+                                public void handle(WindowEvent event) {
+                                    controller.beforeClose();
+                                }
+                            });
                         } else {
                             System.out.println(message.getContent());
                         }

@@ -20,7 +20,9 @@ import org.json.simple.parser.ParseException;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.URL;
+import java.text.BreakIterator;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -60,25 +62,15 @@ public class MessengerClientController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        user = new Client("localhost",1234, "Farbod");
-//        System.out.println("connected to server");
-//        // todo: it should not initialize here
-//        try{
-//            dis = user.getInputStream();
-//        }catch(IOException e){
-//            e.printStackTrace();
-//        }
-//        executor = Executors.newFixedThreadPool(1);
-        listenForServer();  // start listen for server
+        // start listen for server
+        listenForServer();
         System.out.println("listening on servers port");
-
         // get users
         try {
             user.send("GET", Type.clientRequestUserList);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         // send button
         sendButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -100,9 +92,16 @@ public class MessengerClientController implements Initializable {
             public void run() {
                 Message message = null;
                 while (true) {
+                    // if it is interrupted close the thread
+                    if (Thread.currentThread().isInterrupted()){
+                        break;
+                    }
+
                     try {
                         message = new Message(dis.readUTF());
-                    } catch (IOException e) {
+                    }catch (SocketException e){
+                        break;
+                    }catch (IOException e) {
                         e.printStackTrace();
                     }
                     if (message.getMessageType() == Type.textMessage) {
@@ -142,7 +141,6 @@ public class MessengerClientController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     protected void setUser(Client u) {
