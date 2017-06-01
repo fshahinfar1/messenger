@@ -3,16 +3,20 @@ package Model;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+
 // simple json library is a dependency now
 
 public class Message{
 
     private JSONObject message;
 
-    public Message(String content, Type type){
+    public Message(String content, Type type, int id, String userName, String date){
         message = new JSONObject();
         message.put("type", type.name());
         message.put("content",content);
+        message.put("id", id);
+        message.put("author", userName);
+        message.put("date", date);
     }
 
     public Message(String json){
@@ -23,6 +27,9 @@ public class Message{
             JSONObject jsonObject = (JSONObject) new org.json.simple.parser.JSONParser().parse(json);
             message.put("type", jsonObject.get("type"));
             message.put("content", jsonObject.get("content"));
+            message.put("id", jsonObject.get("id"));
+            message.put("author", jsonObject.get("author"));
+            message.put("date", jsonObject.get("date"));
         }catch (ParseException e){
             System.err.println("text cannot be converted to json");
             e.printStackTrace();
@@ -42,6 +49,18 @@ public class Message{
         return (String) message.get("content");
     }
 
+    public int getMessageId(){
+        return (int) message.get("id");
+    }
+
+    public String getMessageAuthor(){
+        return (String) message.get("author");
+    }
+
+    public String getMessageDate(){
+        return (String) message.get("date");
+    }
+    
     @Override
     public String toString(){
         return message.toString();
