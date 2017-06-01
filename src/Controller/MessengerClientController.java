@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import org.json.simple.JSONArray;
@@ -22,7 +23,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
-import java.text.BreakIterator;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -77,7 +77,7 @@ public class MessengerClientController implements Initializable {
             public void handle(ActionEvent event) {
                 String text = chatTextArea.getText() + "\n";
                 try {
-                    user.send(text, Type.textMessage);
+                    user.send(text);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -107,11 +107,13 @@ public class MessengerClientController implements Initializable {
                     if (message.getMessageType() == Type.textMessage) {
                         // show message
                         Label messageLabel = new Label(message.getContent());
+                        HBox hBox = new HBox();
+                        hBox.setPrefWidth(200.0);
+                        hBox.getChildren().add(messageLabel);
                         try {
                             Platform.runLater(new Runnable() {
                                 @Override
-                                public void run() {
-                                    messageVBox.getChildren().add(messageLabel);
+                                public void run() {messageVBox.getChildren().add(messageLabel);
                                 }
                             });
                         } catch (Exception e) {
@@ -143,22 +145,4 @@ public class MessengerClientController implements Initializable {
         }
     }
 
-    protected void setUser(Client u) {
-        if (u.isClosed() || u == null) {
-            throw new RuntimeException("null client");
-        }
-        user = u;
-        try {
-            dis = new DataInputStream(user.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected void setDIS(DataInputStream d) {
-        if (dis == null) {
-            throw new RuntimeException("null DIS");
-        }
-        dis = d;
-    }
 }

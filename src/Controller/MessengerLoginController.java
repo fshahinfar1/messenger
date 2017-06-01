@@ -8,7 +8,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
@@ -50,7 +49,8 @@ public class MessengerLoginController implements Initializable {
                 String userName = userNameTextField.getText();
                 String password = passwordField.getText();
                 // create client and data input stream (DIS)
-                Client user = new Client("localhost", 1234, userName);
+                // todo: this id should come from server and get updated
+                Client user = new Client("localhost", 1234, 0, userName);
                 DataInputStream dis = null;
                 try {
                     dis = user.getInputStream();
@@ -65,7 +65,7 @@ public class MessengerLoginController implements Initializable {
                     loginRequestMessage.put("userName", userName);
                     loginRequestMessage.put("password", password);
                     // send the data to the server and get the result
-                    user.send(new Message(loginRequestMessage.toString(), Type.loginRequest));
+                    user.send(loginRequestMessage.toString(), Type.loginRequest);
                     Message message = new Message(dis.readUTF());
                     // if accepted
                     if (message.getMessageType() == Type.loginRequest) {

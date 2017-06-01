@@ -54,6 +54,10 @@ public class Client {
         send(new Message(content, type, id, clientName, dFormat.format(date.getTime())));
     }
 
+    public void send(String content) throws IOException {
+        send(new Message(content, Type.textMessage, id, clientName, dFormat.format(date.getTime())));
+    }
+
     public DataInputStream getInputStream() throws IOException {
         return new DataInputStream(dis);
     }
