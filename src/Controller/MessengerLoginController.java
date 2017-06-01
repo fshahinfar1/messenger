@@ -50,7 +50,7 @@ public class MessengerLoginController implements Initializable {
                 String password = passwordField.getText();
                 // create client and data input stream (DIS)
                 // todo: this id should come from server and get updated
-                Client user = new Client("localhost", 1234, 0, userName);
+                Client user = new Client("localhost", 1234, "0", userName);
                 DataInputStream dis = null;
                 try {
                     dis = user.getInputStream();

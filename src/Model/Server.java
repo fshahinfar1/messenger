@@ -24,11 +24,12 @@ public class Server {
     private ServerSocket server;
     private ExecutorService executor;
     private HashMap<Socket, String> connectedUsers;
-    private String lastUserName;
-    private Date date;
-    private DateFormat dFormat;
 
     private boolean flagRun;
+
+    private String id;
+    private Date date;
+    private DateFormat dFormat;
 
     public Server(int port) throws IOException {
         executor = Executors.newCachedThreadPool();
@@ -39,6 +40,7 @@ public class Server {
         System.out.println("Start Server on port: " + port);
         flagRun = true;
         listenForClient();
+        id = "SERVER-0";
 
     }
 
@@ -143,13 +145,6 @@ public class Server {
         });
     }
 
-    private void checkLastUser(String name) {
-        if (lastUserName != name) {
-            sendToAll("-" + name + ":\n");
-            lastUserName = name;
-        }
-    }
-
     private void sendToAll(Message message) {
         for (Socket c : connectedUsers.keySet()) {
             try {
@@ -165,11 +160,11 @@ public class Server {
     }
 
     private void sendToAll(String message) {
-        sendToAll(new Message(message, Type.textMessage, 0, "SERVER", dFormat.format(date.getTime())));
+        sendToAll(new Message(message, Type.textMessage, id, "SERVER", dFormat.format(date.getTime())));
     }
 
     private void sendToAll(String message, Type type) {
-        sendToAll(new Message(message, type, 0, "SERVER", dFormat.format(date.getTime())));
+        sendToAll(new Message(message, type, id, "SERVER", dFormat.format(date.getTime())));
     }
 
     private void sendTo(Message message, Socket c) {
@@ -185,11 +180,11 @@ public class Server {
     }
 
     private void sendTo(String message, Type type, Socket c) {
-        sendTo(new Message(message, type, 0, "SERVER", dFormat.format(date.getTime())), c);
+        sendTo(new Message(message, type, id, "SERVER", dFormat.format(date.getTime())), c);
     }
 
     private void sendTo(String message, Socket c) {
-        sendTo(new Message(message, Type.textMessage, 0, "SERVER", dFormat.format(date.getTime())), c);
+        sendTo(new Message(message, Type.textMessage, id, "SERVER", dFormat.format(date.getTime())), c);
     }
 
     public static void main(String[] args) {

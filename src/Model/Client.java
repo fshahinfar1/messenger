@@ -13,12 +13,12 @@ public class Client {
     private Socket connection;
     private DataOutputStream dos;
     private DataInputStream dis;
-    private int id;
+    private String id;
     private String clientName;
     private DateFormat dFormat;
     private Date date;
 
-    public Client(String host, int port, int id, String clientName) {
+    public Client(String host, int port, String id, String clientName) {
         dFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         date = new Date();
         try {
@@ -41,7 +41,7 @@ public class Client {
     }
 
     public Client(String host, int port) {
-        this(host, port, 1111, "GhostUser");
+        this(host, port, "1111", "GhostUser");
     }
 
     public void send(Message message) throws IOException {
@@ -75,7 +75,7 @@ public class Client {
     public static void main(String[] args) throws Exception {
         // todo: remove this
         // this is for test
-        Client user = new Client("localhost", 1234, 1234, "Test");
+        Client user = new Client("localhost", 1234, "1234", "Test");
         System.out.println("Client connected");
     }
 

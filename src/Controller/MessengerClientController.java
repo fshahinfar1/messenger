@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
@@ -41,6 +42,8 @@ public class MessengerClientController implements Initializable {
     private Client user;
     private DataInputStream dis;
     private ExecutorService executor;
+
+    private String lastAuthor;
 
 
     public MessengerClientController(Client u) throws RuntimeException {
@@ -93,32 +96,37 @@ public class MessengerClientController implements Initializable {
                 Message message = null;
                 while (true) {
                     // if it is interrupted close the thread
-                    if (Thread.currentThread().isInterrupted()){
+                    if (Thread.currentThread().isInterrupted()) {
                         break;
                     }
-
+                    // get message from server
                     try {
                         message = new Message(dis.readUTF());
-                    }catch (SocketException e){
+                    } catch (SocketException e) {
                         break;
-                    }catch (IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    // handle messages
                     if (message.getMessageType() == Type.textMessage) {
-                        // show message
-                        Label messageLabel = new Label(message.getContent());
-                        HBox hBox = new HBox();
-                        hBox.setPrefWidth(200.0);
-                        hBox.getChildren().add(messageLabel);
-                        try {
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {messageVBox.getChildren().add(messageLabel);
-                                }
-                            });
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        // show author if needed
+                        // todo: it should be by id not by user name
+                        String messageAuthor = message.getMessageAuthor();
+                        if (!messageAuthor.equals(lastAuthor)) {
+                            lastAuthor = messageAuthor;
+                            int baseLine = 0;
+                            if (messageAuthor.equals(user.getClientName())) {
+                                baseLine = 2;
+                            }
+                            showMessage(messageAuthor, baseLine);
                         }
+                        // show message
+                        int baseLine = 0;
+                        if (messageAuthor.equals(user.getClientName())) {
+                            baseLine = 2;
+                        }
+                        showMessage(message.getContent(), baseLine);
+
                     } else if (message.getMessageType() == Type.clientRequestUserList) {
                         String arrayString = message.getContent();
                         try {
@@ -132,7 +140,34 @@ public class MessengerClientController implements Initializable {
                 }
             }
         });
+    }
 
+    private void showMessage(String message, int baseLine) {
+        // create label
+        Label messageLabel = new Label(message);
+        // pack in HBox
+        HBox hBox = new HBox();
+        hBox.setPrefWidth(350);
+        hBox.getChildren().add(messageLabel);
+        if (baseLine == 0) {
+            hBox.setAlignment(Pos.BASELINE_LEFT);
+        } else if (baseLine == 1) {
+            hBox.setAlignment(Pos.BASELINE_CENTER);
+        } else {
+            hBox.setAlignment(Pos.BASELINE_RIGHT);
+        }
+        hBox.setSpacing(10);
+        // add it to messageVBox
+        try {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    messageVBox.getChildren().add(hBox);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void beforeClose() {
@@ -144,5 +179,4 @@ public class MessengerClientController implements Initializable {
             e.printStackTrace();
         }
     }
-
 }

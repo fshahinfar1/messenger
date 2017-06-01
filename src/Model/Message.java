@@ -10,7 +10,7 @@ public class Message {
 
     private JSONObject message;
 
-    public Message(String content, Type type, int id, String userName, String date) {
+    public Message(String content, Type type, String id, String userName, String date) {
         message = new JSONObject();
         message.put("type", type.name());
         message.put("content", content);
@@ -49,8 +49,8 @@ public class Message {
         return (String) message.get("content");
     }
 
-    public int getMessageId() {
-        return (int) message.get("id");
+    public String getMessageId() {
+        return (String) message.get("id");
     }
 
     public String getMessageAuthor() {
