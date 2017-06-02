@@ -73,12 +73,21 @@ public class DataBaseManager {
         }
     }
 
+    public void insertUserData(String userName, String password, String id) throws SQLException{
+        String sql = String.format("INSERT INTO %s (id, username, password) VALUES(%s,'%s','%s')",
+                tableName, id,userName,password);
+        Statement stmt = connection.createStatement();
+        stmt.executeUpdate(sql);
+        stmt.close();
+    }
+
     public static void main(String[] args) throws SQLException {
         DataBaseManager db = new DataBaseManager();
-        db.selectAll();
+//        db.selectAll();
         try {
-            HashMap<String, String> hm = db.getUserData("Farbod0");
-            System.out.println("id: "+hm.get("id")+"  pass: "+hm.get("password"));
+//            HashMap<String, String> hm = db.getUserData("Farbod0");
+//            System.out.println("id: "+hm.get("id")+"  pass: "+hm.get("password"));
+            db.insertUserData("SomeONeElse","1111", "13");
         }catch (SQLException e){
             System.out.println("No user");
         }
