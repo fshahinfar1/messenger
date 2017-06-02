@@ -16,6 +16,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.WindowEvent;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -50,6 +52,7 @@ public class MessengerLoginController implements Initializable {
                 String password = passwordField.getText();
                 // create client and data input stream (DIS)
                 // todo: this id should come from server and get updated
+                // todo: should create a client for every click???
                 Client user = new Client("localhost", 1234, "0", userName);
                 DataInputStream dis = null;
                 try {
@@ -67,10 +70,20 @@ public class MessengerLoginController implements Initializable {
                     // send the data to the server and get the result
                     user.send(loginRequestMessage.toString(), Type.loginRequest);
                     Message message = new Message(dis.readUTF());
-                    // if accepted
+
                     if (message.getMessageType() == Type.loginRequest) {
-                        if (message.getContent().equals("ACCEPTED")) {
+                        JSONObject answer = null;
+                        try {
+                            answer = (JSONObject) new JSONParser().parse(message.getContent());
+                        } catch (ParseException e) {
+                            System.err.println("couldn't parse json");
+                            e.printStackTrace();
+                        }
+                        // if accepted
+                        if (((String) answer.get("status")).equals("ACCEPTED")) {
                             System.out.println("login accepted");
+                            // set user id
+                            user.setId((String) answer.get("id"));
                             // load fxml
                             FXMLLoader fxmlLoader = new FXMLLoader(getClass()
                                     .getResource("/view/clientMessengerView.fxml"));

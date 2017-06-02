@@ -1,5 +1,6 @@
 package Model;
 
+import DataBase.DataBaseManager;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -9,12 +10,14 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by fsh on 5/25/17.
@@ -30,6 +33,10 @@ public class Server {
     private String id;
     private Date date;
     private DateFormat dFormat;
+    private DataBaseManager db;
+
+    private ReentrantLock connectedUsersLock;
+
 
     public Server(int port) throws IOException {
         executor = Executors.newCachedThreadPool();
@@ -41,6 +48,14 @@ public class Server {
         flagRun = true;
         listenForClient();
         id = "SERVER-0";
+        connectedUsersLock = new ReentrantLock(true);
+
+        try {
+            db = new DataBaseManager();
+        } catch (SQLException e) {
+            System.err.println("couldn't connect to db");
+            e.printStackTrace();
+        }
 
     }
 
@@ -133,11 +148,44 @@ public class Server {
                             String userName = (String) loginRequestMessage.get("userName");
                             String password = (String) loginRequestMessage.get("password");
                             System.out.println("user: " + userName + " pass: " + password);
-                            sendTo("ACCEPTED", Type.loginRequest, client);
+                            HashMap userLoginData = null;
+                            try {
+                                userLoginData = db.getUserData(userName);
+                            } catch (SQLException e) {
+                                JSONObject sendStatus = new JSONObject();
+                                sendStatus.put("status", "FAILED");
+                                System.err.println("couldn't get username and password due to parse issue");
+                                sendTo(sendStatus.toString(), Type.loginRequest, client);
+                                connectedUsersLock.lock();
+                                synchronized (this) {
+                                    connectedUsers.remove(client);
+                                }
+                                break;
+                            }
+                            if (password.equals(userLoginData.get("password"))) {
+                                JSONObject sendStatus = new JSONObject();
+                                sendStatus.put("status", "ACCEPTED");
+                                sendStatus.put("id", userLoginData.get("id"));
+                                sendTo(sendStatus.toString(), Type.loginRequest, client);
+                            } else {
+                                JSONObject sendStatus = new JSONObject();
+                                sendStatus.put("status", "FAILED");
+                                sendTo(sendStatus.toString(), Type.loginRequest, client);
+                                synchronized (this) {
+                                    connectedUsers.remove(client);
+                                }
+                                break;
+                            }
                         } catch (ParseException e) {
                             System.err.println("couldn't get username and password due to parse issue");
                             e.printStackTrace();
-                            sendTo("FAILED", Type.loginRequest, client);
+                            JSONObject sendStatus = new JSONObject();
+                            sendStatus.put("status", "FAILED");
+                            sendTo(sendStatus.toString(), Type.loginRequest, client);
+                            synchronized (this) {
+                                connectedUsers.remove(client);
+                            }
+                            break;
                         }
                     }
                 }
@@ -145,7 +193,7 @@ public class Server {
         });
     }
 
-    private void sendToAll(Message message) {
+    private synchronized void sendToAll(Message message)  {
         for (Socket c : connectedUsers.keySet()) {
             try {
                 DataOutputStream dos = new DataOutputStream(c.getOutputStream());
@@ -167,7 +215,7 @@ public class Server {
         sendToAll(new Message(message, type, id, "SERVER", dFormat.format(date.getTime())));
     }
 
-    private void sendTo(Message message, Socket c) {
+    private synchronized void sendTo(Message message, Socket c) {
         try {
             DataOutputStream dos = new DataOutputStream(c.getOutputStream());
             dos.writeUTF(message.toString());

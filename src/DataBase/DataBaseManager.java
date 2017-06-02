@@ -12,21 +12,19 @@ public class DataBaseManager {
     private String tableName;
     private String url;
 
-    public DataBaseManager() {
+    public DataBaseManager() throws SQLException{
         tableName = "users_data";
         url = "jdbc:sqlite:database/users.db";
         connect();
     }
 
-    public void connect() {
+    public void connect() throws SQLException{
         try {
             // create a connection
             connection = DriverManager.getConnection(url);
 
             System.out.println("Connected to the database");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
+        }finally {
             try {
                 if (connection == null) {
                     connection.close();
@@ -75,7 +73,7 @@ public class DataBaseManager {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         DataBaseManager db = new DataBaseManager();
         db.selectAll();
         try {
