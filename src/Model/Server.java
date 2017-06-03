@@ -36,8 +36,6 @@ public class Server {
     private DateFormat dFormat;
     private DataBaseManager db;
 
-    private ReentrantLock connectedUsersLock;
-
 
     public Server(int port) throws IOException {
         executor = Executors.newCachedThreadPool();
@@ -49,7 +47,6 @@ public class Server {
         flagRun = true;
         listenForClient();
         id = "SERVER-0";
-        connectedUsersLock = new ReentrantLock(true);
 
         try {
             db = new DataBaseManager();
@@ -103,7 +100,7 @@ public class Server {
                         public void run() {
                             try {
                                 handleClient(argScoket, argName);
-                            }catch (IOException e){
+                            } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -114,7 +111,7 @@ public class Server {
         });
     }
 
-    private void handleClient(Socket client, String name) throws IOException{
+    private void handleClient(Socket client, String name) throws IOException {
         // start in another thread
         DataInputStream dis = null;
         Message message = null;
@@ -134,56 +131,31 @@ public class Server {
             } catch (IOException e) {
                 System.out.println("A client handler thread went down");
                 client.close();
+                synchronized (this){
+                    connectedUsers.remove(client);
+                }
                 break;
             }
             //send message to all clients
             if (message.getMessageType() == Type.textMessage) {
-//                        checkLastUser(name);
                 sendToAll(message);
             } else if (message.getMessageType() == Type.fileMessage) {
                 // todo: send the file
-//                        checkLastUser(name);
                 sendToAll("A file is sent");
             } else if (message.getMessageType() == Type.clientRequestUserList) {
                 JSONArray users = new JSONArray();
+                //todo: should I send to all users
                 users.addAll(connectedUsers.values());
-                System.out.println(users.toString());
                 sendToAll(users.toString(), Type.clientRequestUserList);
             } else if (message.getMessageType() == Type.loginRequest) {
-                // todo: working here
+                // get user data from message
+                JSONObject accountData = null;
+                String userName = "";
+                String password = "";
                 try {
-                    JSONObject loginRequestMessage = (JSONObject) new JSONParser().parse(message.getContent());
-                    String userName = (String) loginRequestMessage.get("userName");
-                    String password = (String) loginRequestMessage.get("password");
-                    System.out.println("user: " + userName + " pass: " + password);
-                    HashMap userLoginData = null;
-                    try {
-                        userLoginData = db.getUserData(userName);
-                    } catch (SQLException e) {
-                        JSONObject sendStatus = new JSONObject();
-                        sendStatus.put("status", "FAILED");
-                        System.err.println("couldn't get username and password due to parse issue");
-                        sendTo(sendStatus.toString(), Type.loginRequest, client);
-                        connectedUsersLock.lock();
-                        synchronized (this) {
-                            connectedUsers.remove(client);
-                        }
-                        break;
-                    }
-                    if (password.equals(userLoginData.get("password"))) {
-                        JSONObject sendStatus = new JSONObject();
-                        sendStatus.put("status", "ACCEPTED");
-                        sendStatus.put("id", userLoginData.get("id"));
-                        sendTo(sendStatus.toString(), Type.loginRequest, client);
-                    } else {
-                        JSONObject sendStatus = new JSONObject();
-                        sendStatus.put("status", "FAILED");
-                        sendTo(sendStatus.toString(), Type.loginRequest, client);
-                        synchronized (this) {
-                            connectedUsers.remove(client);
-                        }
-                        break;
-                    }
+                    accountData = (JSONObject) new JSONParser().parse(message.getContent());
+                    userName = (String) accountData.get("userName");
+                    password = (String) accountData.get("password");
                 } catch (ParseException e) {
                     System.err.println("couldn't get username and password due to parse issue");
                     e.printStackTrace();
@@ -193,32 +165,51 @@ public class Server {
                     synchronized (this) {
                         connectedUsers.remove(client);
                     }
+                    client.close();
                     break;
                 }
+                // get user data from database
+                HashMap userLoginData = null;
+                try {
+                    userLoginData = db.getUserData(userName);
+                } catch (SQLException e) {
+                    JSONObject sendStatus = new JSONObject();
+                    sendStatus.put("status", "FAILED");
+                    System.err.println("couldn't get username and password due to parse issue");
+                    System.err.println("username: " + userName + " password: " + password);
+                    sendTo(sendStatus.toString(), Type.loginRequest, client);
+                    synchronized (this) {
+                        connectedUsers.remove(client);
+                    }
+                    client.close();
+                    break;
+                }
+                // check password
+                if (password.equals(userLoginData.get("password"))) {
+                    JSONObject sendStatus = new JSONObject();
+                    sendStatus.put("status", "ACCEPTED");
+                    sendStatus.put("id", userLoginData.get("id"));
+                    sendTo(sendStatus.toString(), Type.loginRequest, client);
+                } else {
+                    JSONObject sendStatus = new JSONObject();
+                    sendStatus.put("status", "WRONG PASSWORD");
+                    sendTo(sendStatus.toString(), Type.loginRequest, client);
+                    synchronized (this) {
+                        connectedUsers.remove(client);
+                    }
+                    client.close();
+                    break;
+                }
+                // end of loginRequest
             } else if (message.getMessageType() == Type.createRequest) {
+                // get user data from message
                 JSONObject accountData = null;
+                String userName = "";
+                String password;
                 try {
                     accountData = (JSONObject) new JSONParser().parse(message.getContent());
-                    String userName = (String) accountData.get("userName");
-                    String password = (String) accountData.get("password");
-//                    String id = UUID.randomUUID().toString();
-                    String id = String.valueOf(db.getLastID()+1);
-                    System.out.println("id : " + id);
-                    try {
-                        db.insertUserData(userName, password, id);
-                        accountData.put("id", id);
-                        accountData.put("status", "ACCEPTED");
-                        sendTo(accountData.toString(), Type.createRequest, client);
-                    } catch (SQLException err) {
-                        // couldn't insert into db
-                        System.err.println("couldn't insert into db");
-                        accountData.put("status", "FAILED");
-                        sendTo(accountData.toString(), Type.createRequest, client);
-                        synchronized (this) {
-                            connectedUsers.remove(client);
-                        }
-                        break;
-                    }
+                    userName = (String) accountData.get("userName");
+                    password = (String) accountData.get("password");
                 } catch (ParseException e) {
                     System.err.println("couldn't parse json -- createRequest --");
                     accountData.put("status", "FAILED");
@@ -226,8 +217,30 @@ public class Server {
                     synchronized (this) {
                         connectedUsers.remove(client);
                     }
+                    client.close();
                     break;
                 }
+                // todo: I should use a better id
+//                    String id = UUID.randomUUID().toString();
+                    String id = String.valueOf(db.getLastID() + 1);
+                // inser data into database
+                try {
+                    db.insertUserData(userName, password, id);
+                    accountData.put("id", id);
+                    accountData.put("status", "ACCEPTED");
+                    sendTo(accountData.toString(), Type.createRequest, client);
+                } catch (SQLException err) {
+                    // couldn't insert into db
+                    System.err.println("couldn't insert into db");
+                    accountData.put("status", "FAILED ?USED-USERNAME");
+                    sendTo(accountData.toString(), Type.createRequest, client);
+                    synchronized (this) {
+                        connectedUsers.remove(client);
+                    }
+                    client.close();
+                    break;
+                }
+                // end of createRequest
             }
         }
     }
@@ -237,20 +250,18 @@ public class Server {
             try {
                 DataOutputStream dos = new DataOutputStream(c.getOutputStream());
                 dos.writeUTF(message.toString());
-            } catch (SocketException e) {
+            } catch (IOException e) {
                 connectedUsers.remove(c);
                 System.out.println("Remove a user from connectedUsers collection");
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }
 
-    private void sendToAll(String message) {
+    private synchronized void sendToAll(String message) {
         sendToAll(new Message(message, Type.textMessage, id, "SERVER", dFormat.format(date.getTime())));
     }
 
-    private void sendToAll(String message, Type type) {
+    private synchronized void sendToAll(String message, Type type) {
         sendToAll(new Message(message, type, id, "SERVER", dFormat.format(date.getTime())));
     }
 
@@ -258,19 +269,17 @@ public class Server {
         try {
             DataOutputStream dos = new DataOutputStream(c.getOutputStream());
             dos.writeUTF(message.toString());
-        } catch (SocketException e) {
+        } catch (IOException e) {
             connectedUsers.remove(c);
             System.out.println("Remove a user from connectedUsers collection");
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    private void sendTo(String message, Type type, Socket c) {
+    private synchronized void sendTo(String message, Type type, Socket c) {
         sendTo(new Message(message, type, id, "SERVER", dFormat.format(date.getTime())), c);
     }
 
-    private void sendTo(String message, Socket c) {
+    private synchronized void sendTo(String message, Socket c) {
         sendTo(new Message(message, Type.textMessage, id, "SERVER", dFormat.format(date.getTime())), c);
     }
 
