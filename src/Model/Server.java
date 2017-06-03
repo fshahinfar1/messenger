@@ -15,6 +15,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
@@ -94,106 +95,144 @@ public class Server {
                         throw new RuntimeException("clientName Not received");
                     }
                     connectedUsers.put(client, name);
-                    handleClient(client, name);
+
+                    final Socket argScoket = client;
+                    final String argName = name;
+                    executor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                handleClient(argScoket, argName);
+                            }catch (IOException e){
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                     System.out.println("Client connected and handle thread started");
                 }
             }
         });
     }
 
-    private void handleClient(Socket client, String name) {
+    private void handleClient(Socket client, String name) throws IOException{
         // start in another thread
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                DataInputStream dis = null;
-                Message message = null;
-                try {
-                    dis = new DataInputStream(client.getInputStream());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.err.println("couldn't establish DataInputStream connection");
-                    return;
-                }
-                while (true) {
+        DataInputStream dis = null;
+        Message message = null;
 
-                    // get a message from client
+        try {
+            dis = new DataInputStream(client.getInputStream());
+        } catch (IOException e) {
+            System.err.println("couldn't establish DataInputStream connection");
+            return;
+        }
+
+        while (true) {
+
+            // get a message from client
+            try {
+                message = new Message(dis.readUTF());
+            } catch (IOException e) {
+                System.out.println("A client handler thread went down");
+                client.close();
+                break;
+            }
+            //send message to all clients
+            if (message.getMessageType() == Type.textMessage) {
+//                        checkLastUser(name);
+                sendToAll(message);
+            } else if (message.getMessageType() == Type.fileMessage) {
+                // todo: send the file
+//                        checkLastUser(name);
+                sendToAll("A file is sent");
+            } else if (message.getMessageType() == Type.clientRequestUserList) {
+                JSONArray users = new JSONArray();
+                users.addAll(connectedUsers.values());
+                System.out.println(users.toString());
+                sendToAll(users.toString(), Type.clientRequestUserList);
+            } else if (message.getMessageType() == Type.loginRequest) {
+                // todo: working here
+                try {
+                    JSONObject loginRequestMessage = (JSONObject) new JSONParser().parse(message.getContent());
+                    String userName = (String) loginRequestMessage.get("userName");
+                    String password = (String) loginRequestMessage.get("password");
+                    System.out.println("user: " + userName + " pass: " + password);
+                    HashMap userLoginData = null;
                     try {
-                        message = new Message(dis.readUTF());
-                    } catch (SocketException e) {
-                        System.out.println("A client handler thread went down");
-                        break;
-                    } catch (IOException e) {
-//                        e.printStackTrace();
-                        System.out.println("A client handler thread went down");
-                        break;
-                    }
-                    //send message to all clients
-                    if (message.getMessageType() == Type.textMessage) {
-//                        checkLastUser(name);
-                        sendToAll(message);
-                    } else if (message.getMessageType() == Type.fileMessage) {
-                        // todo: send the file
-//                        checkLastUser(name);
-                        sendToAll("A file is sent");
-                    } else if (message.getMessageType() == Type.clientRequestUserList) {
-                        JSONArray users = new JSONArray();
-                        users.addAll(connectedUsers.values());
-                        System.out.println(users.toString());
-                        sendToAll(users.toString(), Type.clientRequestUserList);
-                    } else if (message.getMessageType() == Type.loginRequest) {
-                        // todo: working here
-                        try {
-                            JSONObject loginRequestMessage = (JSONObject) new JSONParser().parse(message.getContent());
-                            String userName = (String) loginRequestMessage.get("userName");
-                            String password = (String) loginRequestMessage.get("password");
-                            System.out.println("user: " + userName + " pass: " + password);
-                            HashMap userLoginData = null;
-                            try {
-                                userLoginData = db.getUserData(userName);
-                            } catch (SQLException e) {
-                                JSONObject sendStatus = new JSONObject();
-                                sendStatus.put("status", "FAILED");
-                                System.err.println("couldn't get username and password due to parse issue");
-                                sendTo(sendStatus.toString(), Type.loginRequest, client);
-                                connectedUsersLock.lock();
-                                synchronized (this) {
-                                    connectedUsers.remove(client);
-                                }
-                                break;
-                            }
-                            if (password.equals(userLoginData.get("password"))) {
-                                JSONObject sendStatus = new JSONObject();
-                                sendStatus.put("status", "ACCEPTED");
-                                sendStatus.put("id", userLoginData.get("id"));
-                                sendTo(sendStatus.toString(), Type.loginRequest, client);
-                            } else {
-                                JSONObject sendStatus = new JSONObject();
-                                sendStatus.put("status", "FAILED");
-                                sendTo(sendStatus.toString(), Type.loginRequest, client);
-                                synchronized (this) {
-                                    connectedUsers.remove(client);
-                                }
-                                break;
-                            }
-                        } catch (ParseException e) {
-                            System.err.println("couldn't get username and password due to parse issue");
-                            e.printStackTrace();
-                            JSONObject sendStatus = new JSONObject();
-                            sendStatus.put("status", "FAILED");
-                            sendTo(sendStatus.toString(), Type.loginRequest, client);
-                            synchronized (this) {
-                                connectedUsers.remove(client);
-                            }
-                            break;
+                        userLoginData = db.getUserData(userName);
+                    } catch (SQLException e) {
+                        JSONObject sendStatus = new JSONObject();
+                        sendStatus.put("status", "FAILED");
+                        System.err.println("couldn't get username and password due to parse issue");
+                        sendTo(sendStatus.toString(), Type.loginRequest, client);
+                        connectedUsersLock.lock();
+                        synchronized (this) {
+                            connectedUsers.remove(client);
                         }
+                        break;
                     }
+                    if (password.equals(userLoginData.get("password"))) {
+                        JSONObject sendStatus = new JSONObject();
+                        sendStatus.put("status", "ACCEPTED");
+                        sendStatus.put("id", userLoginData.get("id"));
+                        sendTo(sendStatus.toString(), Type.loginRequest, client);
+                    } else {
+                        JSONObject sendStatus = new JSONObject();
+                        sendStatus.put("status", "FAILED");
+                        sendTo(sendStatus.toString(), Type.loginRequest, client);
+                        synchronized (this) {
+                            connectedUsers.remove(client);
+                        }
+                        break;
+                    }
+                } catch (ParseException e) {
+                    System.err.println("couldn't get username and password due to parse issue");
+                    e.printStackTrace();
+                    JSONObject sendStatus = new JSONObject();
+                    sendStatus.put("status", "FAILED");
+                    sendTo(sendStatus.toString(), Type.loginRequest, client);
+                    synchronized (this) {
+                        connectedUsers.remove(client);
+                    }
+                    break;
+                }
+            } else if (message.getMessageType() == Type.createRequest) {
+                JSONObject accountData = null;
+                try {
+                    accountData = (JSONObject) new JSONParser().parse(message.getContent());
+                    String userName = (String) accountData.get("userName");
+                    String password = (String) accountData.get("password");
+//                    String id = UUID.randomUUID().toString();
+                    String id = String.valueOf(db.getLastID()+1);
+                    System.out.println("id : " + id);
+                    try {
+                        db.insertUserData(userName, password, id);
+                        accountData.put("id", id);
+                        accountData.put("status", "ACCEPTED");
+                        sendTo(accountData.toString(), Type.createRequest, client);
+                    } catch (SQLException err) {
+                        // couldn't insert into db
+                        System.err.println("couldn't insert into db");
+                        accountData.put("status", "FAILED");
+                        sendTo(accountData.toString(), Type.createRequest, client);
+                        synchronized (this) {
+                            connectedUsers.remove(client);
+                        }
+                        break;
+                    }
+                } catch (ParseException e) {
+                    System.err.println("couldn't parse json -- createRequest --");
+                    accountData.put("status", "FAILED");
+                    sendTo(accountData.toString(), Type.createRequest, client);
+                    synchronized (this) {
+                        connectedUsers.remove(client);
+                    }
+                    break;
                 }
             }
-        });
+        }
     }
 
-    private synchronized void sendToAll(Message message)  {
+    private synchronized void sendToAll(Message message) {
         for (Socket c : connectedUsers.keySet()) {
             try {
                 DataOutputStream dos = new DataOutputStream(c.getOutputStream());

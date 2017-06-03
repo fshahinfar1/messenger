@@ -84,25 +84,56 @@ public class MessengerLoginController implements Initializable {
                             System.out.println("login accepted");
                             // set user id
                             user.setId((String) answer.get("id"));
-                            // load fxml
-                            FXMLLoader fxmlLoader = new FXMLLoader(getClass()
-                                    .getResource("/view/clientMessengerView.fxml"));
-                            // create controller
-                            MessengerClientController controller = new MessengerClientController(user);
-                            // connect fxml and controller
-                            fxmlLoader.setController(controller);
-                            GridPane root = fxmlLoader.load();
-                            // create the scene
-                            Scene scene = new Scene(root, 600, 400);
-                            Main.stage.setScene(scene);
-                            Main.stage.show();
-                            // set the behavior for exit
-                            Main.stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                                @Override
-                                public void handle(WindowEvent event) {
-                                    controller.beforeClose();
-                                }
-                            });
+                            loadMessengerView(user);
+                        } else {
+                            System.out.println(message.getContent());
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        // create button
+        createButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                // get userName and password from input
+                String userName = userNameTextField.getText();
+                String password = passwordField.getText();
+                // create client and data input stream (DIS)
+                // todo: this id should come from server and get updated
+                // todo: should create a client for every click???
+                Client user = new Client("localhost", 1234, "0", userName);
+                DataInputStream dis = null;
+                try {
+                    dis = user.getInputStream();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("connected to server");
+                // send login request to the server
+                try {
+                    // pack userName and password in a json
+                    JSONObject loginRequestMessage = new JSONObject();
+                    loginRequestMessage.put("userName", userName);
+                    loginRequestMessage.put("password", password);
+                    // send the data to the server and get the result
+                    user.send(loginRequestMessage.toString(), Type.createRequest);
+                    Message message = new Message(dis.readUTF());
+                    System.out.println("xxxxxx");
+                    if (message.getMessageType() == Type.createRequest) {
+                        JSONObject answer = null;
+                        try {
+                            answer = (JSONObject) new JSONParser().parse(message.getContent());
+                        } catch (ParseException e) {
+                            System.err.println("couldn't parse json");
+                            e.printStackTrace();
+                        }
+
+                        if (((String)answer.get("status")).equals("ACCEPTED")) {
+                            user.setId((String) answer.get("id"));
+                            loadMessengerView(user);
                         } else {
                             System.out.println(message.getContent());
                         }
@@ -113,5 +144,31 @@ public class MessengerLoginController implements Initializable {
             }
         });
 
+    }
+
+    private void loadMessengerView(Client user){
+        try{
+            // load fxml
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass()
+                    .getResource("/view/clientMessengerView.fxml"));
+            // create controller
+            MessengerClientController controller = new MessengerClientController(user);
+            // connect fxml and controller
+            fxmlLoader.setController(controller);
+            GridPane root = fxmlLoader.load();
+            // create the scene
+            Scene scene = new Scene(root, 600, 400);
+            Main.stage.setScene(scene);
+            Main.stage.show();
+            // set the behavior for exit
+            Main.stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    controller.beforeClose();
+                }
+            });
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }

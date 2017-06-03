@@ -81,15 +81,30 @@ public class DataBaseManager {
         stmt.close();
     }
 
+    public int getLastID(){
+        ResultSet rs = null;
+        int id=-1;
+        try {
+            String sql = String.format("SELECT id FROM %s ORDER BY id DESC LIMIT 1", tableName);
+            Statement stmt = connection.createStatement();
+            rs = stmt.executeQuery(sql);
+            id=rs.getInt("id");
+        }catch (SQLException e){
+            return -1;
+        }
+        return id;
+    }
+
     public static void main(String[] args) throws SQLException {
         DataBaseManager db = new DataBaseManager();
 //        db.selectAll();
-        try {
-//            HashMap<String, String> hm = db.getUserData("Farbod0");
-//            System.out.println("id: "+hm.get("id")+"  pass: "+hm.get("password"));
-            db.insertUserData("SomeONeElse","1111", "13");
-        }catch (SQLException e){
-            System.out.println("No user");
-        }
+//        try {
+////            HashMap<String, String> hm = db.getUserData("Farbod0");
+////            System.out.println("id: "+hm.get("id")+"  pass: "+hm.get("password"));
+////            db.insertUserData("SomeONeElse","1111", "13");
+//        }catch (SQLException e){
+//            System.out.println("No user");
+//        }
+        System.out.println(db.getLastID());
     }
 }

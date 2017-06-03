@@ -7,6 +7,7 @@ public enum Type{
     textMessage,
     fileMessage,
     clientRequestUserList,
-    loginRequest;
+    loginRequest,
+    createRequest;
 
 }
