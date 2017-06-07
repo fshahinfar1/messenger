@@ -13,6 +13,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
@@ -21,6 +24,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.URL;
@@ -85,6 +89,34 @@ public class MessengerClientController implements Initializable {
                     e.printStackTrace();
                 }
                 chatTextArea.clear();
+            }
+        });
+        // drag over message scroll pane
+        chatTextArea.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                Dragboard db = event.getDragboard();
+                if(event.getGestureSource()!= chatTextArea &&db.hasFiles()){
+                    event.acceptTransferModes(TransferMode.COPY);
+                }
+                event.acceptTransferModes(TransferMode.COPY);
+            }
+        });
+        chatTextArea.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+                if (db.hasFiles()) {
+                    success = true;
+                    String filePath = null;
+                    for (File file:db.getFiles()) {
+                        filePath = file.getAbsolutePath();
+                        System.out.println(filePath);
+                    }
+                }
+                event.setDropCompleted(success);
+                event.consume();
             }
         });
     }

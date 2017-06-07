@@ -1,6 +1,7 @@
 package Model;
 
 import DataBase.DataBaseManager;
+import DataBase.FileManager;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -15,6 +16,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,12 +32,12 @@ public class Server {
     private HashMap<Socket, String> connectedUsers;
 
     private boolean flagRun;
-
     private String id;
+
     private Date date;
     private DateFormat dFormat;
     private DataBaseManager db;
-
+    private File chatHistory;
 
     public Server(int port) throws IOException {
         executor = Executors.newCachedThreadPool();
@@ -45,16 +47,15 @@ public class Server {
         server = new ServerSocket(port);
         System.out.println("Start Server on port: " + port);
         flagRun = true;
-        listenForClient();
         id = "SERVER-0";
-
+        chatHistory = new File("data/history/"+"fileTest"+".txt");
         try {
             db = new DataBaseManager();
         } catch (SQLException e) {
             System.err.println("couldn't connect to db");
             e.printStackTrace();
         }
-
+        listenForClient();
     }
 
     private void listenForClient() {
@@ -64,6 +65,11 @@ public class Server {
                 DataInputStream dis = null;
                 Socket client = null;
                 while (flagRun) {
+                    if(Thread.currentThread().isInterrupted()){
+                        flagRun = false;
+                        break;
+                    }
+
                     try {
                         System.out.println("waiting for client...");
                         client = server.accept();
@@ -123,8 +129,11 @@ public class Server {
             return;
         }
 
-        while (true) {
-
+        while (flagRun) {
+            if(Thread.currentThread().isInterrupted()){
+                flagRun = false;
+                break;
+            }
             // get a message from client
             try {
                 message = new Message(dis.readUTF());
@@ -139,6 +148,9 @@ public class Server {
             //send message to all clients
             if (message.getMessageType() == Type.textMessage) {
                 sendToAll(message);
+                // todo: first fix the file manager
+//                FileManager fileManager = new FileManager(this.chatHistory);
+//                fileManager.InsertMessage(message);
             } else if (message.getMessageType() == Type.fileMessage) {
                 // todo: send the file
                 sendToAll("A file is sent");
@@ -285,10 +297,21 @@ public class Server {
 
     public static void main(String[] args) {
         // todo: this should change and UI should be added
+        Server s = null;
         try {
-            Server s = new Server(1234);
+            s = new Server(1234);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        Scanner input = new Scanner(System.in);
+        while(true){
+            String command = input.next();
+            if(command.toLowerCase().equals("quit")){
+                System.out.println("Server is shutting down...");
+                s.executor.shutdownNow();
+                System.exit(0);
+                break;
+            }
         }
     }
 }

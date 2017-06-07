@@ -14,7 +14,7 @@ public class DataBaseManager {
 
     public DataBaseManager() throws SQLException{
         tableName = "users_data";
-        url = "jdbc:sqlite:database/users.db";
+        url = "jdbc:sqlite:data/database/users.db";
         connect();
     }
 
