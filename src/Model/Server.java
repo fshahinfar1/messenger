@@ -2,11 +2,16 @@ package Model;
 
 import DataBase.DataBaseManager;
 import DataBase.FileManager;
+import com.sun.org.apache.xerces.internal.impl.dv.util.*;
+import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
+import sun.misc.BASE64Decoder;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,10 +19,7 @@ import java.net.SocketException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
@@ -153,7 +155,32 @@ public class Server {
 //                fileManager.InsertMessage(message);
             } else if (message.getMessageType() == Type.fileMessage) {
                 // todo: send the file
-                sendToAll("A file is sent");
+                // it should send any kind of file
+//                sendToAll("A file is sent");
+                JSONObject fileData = null;
+                try {
+                    fileData = (JSONObject) new JSONParser().parse(message.getContent());
+                }catch (ParseException e){
+                    System.err.println("couldn't parse");
+                }
+
+                File file = new File("data/files/"+fileData.get("name"));
+                if(!file.exists()){
+                    try {
+                        file.createNewFile();
+                    }catch (IOException e){
+                        System.err.println("*** couldn't make a file ***");
+                    }
+                }
+                RandomAccessFile writer = new RandomAccessFile(file,"rw");
+                int lenght = Integer.valueOf((String) fileData.get("length"));
+                try {
+                    writer.seek(writer.length());
+                    writer.write(Base64.decode((String) fileData.get("content")),0 ,lenght);
+                } catch (Base64DecodingException e) {
+                    e.printStackTrace();
+                }
+                writer.close();
             } else if (message.getMessageType() == Type.clientRequestUserList) {
                 JSONArray users = new JSONArray();
                 //todo: should I send to all users

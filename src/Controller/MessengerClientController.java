@@ -4,6 +4,7 @@ import Model.Client;
 import Model.Message;
 import Model.Type;
 import com.sun.javafx.collections.ObservableListWrapper;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,14 +21,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.IOException;
+import javax.xml.bind.DatatypeConverter;
+import java.io.*;
 import java.net.SocketException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,7 +66,7 @@ public class MessengerClientController implements Initializable {
             e.printStackTrace();
         }
 
-        executor = Executors.newFixedThreadPool(1);
+        executor = Executors.newCachedThreadPool();
     }
 
     @Override
@@ -113,6 +115,14 @@ public class MessengerClientController implements Initializable {
                     for (File file:db.getFiles()) {
                         filePath = file.getAbsolutePath();
                         System.out.println(filePath);
+                        executor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                System.out.println("before start");
+                                sendFile(file);
+                                System.out.println("start");
+                            }
+                        });
                     }
                 }
                 event.setDropCompleted(success);
@@ -174,7 +184,7 @@ public class MessengerClientController implements Initializable {
         });
     }
 
-    private void showMessage(String message, int baseLine) {
+    private void showMessage(String message, int baseLine){
         // create label
         Label messageLabel = new Label(message);
         // pack in HBox
@@ -200,6 +210,37 @@ public class MessengerClientController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void sendFile(File file){
+        System.out.println("start sending a file");
+        InputStream reader = null;
+        try {
+            reader = new FileInputStream(file);
+        }catch (FileNotFoundException e){
+            System.err.println("file not found");
+            return;
+        }
+
+        byte[] bytes = new byte[1024];
+        int count = 0;
+        try {
+            while (reader.available() > 0) {
+                Arrays.fill(bytes, (byte) 0);
+                count = reader.read(bytes,0,1024);
+                JSONObject fileData = new JSONObject();
+                fileData.put("name", file.getName());
+                String tmp = Base64.encode(bytes,count);
+//                System.out.println(tmp);
+//                System.out.println(count);
+                fileData.put("content",tmp );
+                fileData.put("length", String.valueOf(count));
+                user.send(fileData.toString(), Type.fileMessage);
+            }
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        System.out.println("File has been sent");
     }
 
     public void beforeClose() {
