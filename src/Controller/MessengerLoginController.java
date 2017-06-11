@@ -55,6 +55,15 @@ public class MessengerLoginController implements Initializable {
                 // get userName and password from input
                 String userName = userNameTextField.getText();
                 String password = passwordField.getText();
+                // check input
+                if(userName.equals("")){
+                    promptLabel.setText("please choose a username");
+                    return;
+                }
+                if(password.equals("")){
+                    promptLabel.setText("please choose a password");
+                    return;
+                }
                 // create client and data input stream (DIS)
                 // todo: this id should come from server and get updated
                 // todo: should create a client for every click???

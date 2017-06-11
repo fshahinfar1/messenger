@@ -9,17 +9,19 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -45,15 +47,20 @@ public class MessengerClientController implements Initializable {
     private ListView usersListView;
     @FXML
     private VBox messageVBox;
+    @FXML
+    private MenuItem closeMenuItem;
+    @FXML
+    private MenuItem aboutMenuItem;
 
     private Client user;
     private DataInputStream dis;
     private ExecutorService executor;
 
     private String lastAuthor;
-
+    private boolean flagAboutWindow = true;
 
     public MessengerClientController(Client u) throws RuntimeException {
+        // constructor
 
         if (u.isClosed() || u == null) {
             throw new RuntimeException("null client");
@@ -94,8 +101,9 @@ public class MessengerClientController implements Initializable {
                 chatTextArea.clear();
             }
         });
-        // drag over message scroll pane
+        // drag over chat TextArea
         chatTextArea.setOnDragOver(new EventHandler<DragEvent>() {
+            // accecpt draging over
             @Override
             public void handle(DragEvent event) {
                 Dragboard db = event.getDragboard();
@@ -106,6 +114,7 @@ public class MessengerClientController implements Initializable {
             }
         });
         chatTextArea.setOnDragDropped(new EventHandler<DragEvent>() {
+            // handle drop event
             @Override
             public void handle(DragEvent event) {
                 Dragboard db = event.getDragboard();
@@ -128,6 +137,42 @@ public class MessengerClientController implements Initializable {
                 }
                 event.setDropCompleted(success);
                 event.consume();
+            }
+        });
+
+        // close menuItem
+        closeMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Platform.exit();
+            }
+        });// end of close menuItem
+
+        // about menuItem
+        aboutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(flagAboutWindow) {
+                    flagAboutWindow = false;
+                    Stage aboutStage = new Stage();
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/About.fxml"));
+                    Parent root = null;
+                    try {
+                        root = loader.load();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    aboutStage.setScene(new Scene(root));
+                    aboutStage.setTitle("About");
+                    aboutStage.setResizable(false);
+                    aboutStage.show();
+                    aboutStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                        @Override
+                        public void handle(WindowEvent event) {
+                            aboutWindowBeforeCloes();
+                        }
+                    });
+                }
             }
         });
     }
@@ -260,4 +305,9 @@ public class MessengerClientController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    private void aboutWindowBeforeCloes(){
+        flagAboutWindow = true;
+    }
+
 }
