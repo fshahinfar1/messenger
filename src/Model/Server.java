@@ -155,16 +155,18 @@ public class Server {
 //                fileManager.InsertMessage(message);
             } else if (message.getMessageType() == Type.fileMessage) {
                 // todo: send the file
-                // it should send any kind of file
-//                sendToAll("A file is sent");
                 JSONObject fileData = null;
                 try {
                     fileData = (JSONObject) new JSONParser().parse(message.getContent());
                 }catch (ParseException e){
                     System.err.println("couldn't parse");
                 }
-
-                File file = new File("data/files/"+fileData.get("name"));
+                // if file recieved completely
+                if(((String)fileData.get("status")).equals("DONE")){
+                    sendToAll("A file is Sent");
+                    continue;
+                }
+                File file = new File("data/files/"+((String) fileData.get("name")));
                 if(!file.exists()){
                     try {
                         file.createNewFile();

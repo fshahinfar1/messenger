@@ -31,6 +31,7 @@ import java.net.SocketException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.ResourceBundle;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -224,19 +225,26 @@ public class MessengerClientController implements Initializable {
 
         byte[] bytes = new byte[1024];
         int count = 0;
+        String prefix = UUID.randomUUID().toString();
+        System.out.println(prefix);
         try {
             while (reader.available() > 0) {
                 Arrays.fill(bytes, (byte) 0);
                 count = reader.read(bytes,0,1024);
                 JSONObject fileData = new JSONObject();
-                fileData.put("name", file.getName());
+                fileData.put("name", prefix+file.getName());
                 String tmp = Base64.encode(bytes,count);
-//                System.out.println(tmp);
-//                System.out.println(count);
                 fileData.put("content",tmp );
+                fileData.put("status", "SENDING");
                 fileData.put("length", String.valueOf(count));
                 user.send(fileData.toString(), Type.fileMessage);
             }
+            JSONObject fileData = new JSONObject();
+            fileData.put(prefix+"name", file.getName());
+            fileData.put("content","" );
+            fileData.put("status", "DONE");
+            fileData.put("length", 0);
+            user.send(fileData.toString(), Type.fileMessage);
         }catch (IOException e){
             e.printStackTrace();
         }
