@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -53,6 +54,8 @@ public class MessengerClientController implements Initializable {
     private MenuItem aboutMenuItem;
     @FXML
     private MenuItem signoutMenuItem;
+    @FXML
+    private MenuItem exportMenuItem;
 
     private Client user;
     private DataInputStream dis;
@@ -187,6 +190,34 @@ public class MessengerClientController implements Initializable {
                 loadLogin();
             }
         });// end of signout menuItem
+
+        // export menuItem
+        exportMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                // todo: get output address from user
+                // open export file
+                File exportFile = new File("chat_history.txt");
+                PrintWriter writer = null;
+                try {
+                    writer = new PrintWriter(exportFile);
+                }catch (FileNotFoundException e){
+                    e.printStackTrace();
+                }
+                // read history
+                System.out.println(messageVBox.getChildren().size());
+                for(int i=0;i<messageVBox.getChildren().size();i++){
+                    Node n = ((HBox) messageVBox.getChildren().get(i)).getChildren().get(0);
+                    if(n instanceof Label){
+                        Label textLabel = (Label) n;
+                        String text = textLabel.getText();
+                        // write history to export file
+                        writer.append(text);
+                    }
+                }
+                writer.close();
+            }
+        });// end of export menuItem
     }
 
     private void listenForServer() {
@@ -209,6 +240,7 @@ public class MessengerClientController implements Initializable {
                     }
                     // handle messages
                     if (message.getMessageType() == Type.textMessage) {
+                        // handles textMessage coming from server
                         // show author if needed
                         // todo: it should be by id not by user name
                         String messageAuthor = message.getMessageAuthor();
@@ -218,7 +250,7 @@ public class MessengerClientController implements Initializable {
                             if (messageAuthor.equals(user.getClientName())) {
                                 baseLine = 2;
                             }
-                            showMessage(messageAuthor, baseLine);
+                            showMessage(messageAuthor+"\n", baseLine);
                         }
                         // show message
                         int baseLine = 0;
@@ -228,6 +260,7 @@ public class MessengerClientController implements Initializable {
                         showMessage(message.getContent(), baseLine);
 
                     } else if (message.getMessageType() == Type.clientRequestUserList) {
+                        // handles UserList request answer comming form server
                         String arrayString = message.getContent();
                         try {
                             JSONArray arr = (JSONArray) new JSONParser().parse(arrayString);
