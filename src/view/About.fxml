@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label layoutX="56.0" layoutY="239.0" text="Messenger - 2017 - Farbod Shahinfar" />
+      <TextArea editable="false" layoutX="16.0" layoutY="21.0" prefHeight="200.0" prefWidth="336.0" text="Messenger&#10;By Farbod Shahinfar&#10;this is for advanced programming final project&#10;Iran university of Science and Technology&#10;Spring 1396&#10;2017&#10;&#10;github:&#10;https://github.com/fshahinfar1/messenger.git&#10;&#10;" />
+   </children>
+</AnchorPane>

@@ -1,6 +1,7 @@
 package Model;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,18 +19,14 @@ public class Client {
     private DateFormat dFormat;
     private Date date;
 
-    public Client(String host, int port, String id, String clientName) {
+    public Client(String host, int port, String id, String clientName) throws IOException {
         dFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         date = new Date();
-        try {
-            connection = new Socket(host, port);
+        connection = new Socket(host, port);
 //            System.out.println("Client connected");
-            dos = new DataOutputStream(connection.getOutputStream());
-            dos.flush();
-            dis = new DataInputStream(connection.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        dos = new DataOutputStream(connection.getOutputStream());
+        dos.flush();
+        dis = new DataInputStream(connection.getInputStream());
         this.id = id;
         this.clientName = clientName;
         // send client name to server
@@ -40,7 +37,7 @@ public class Client {
         }
     }
 
-    public Client(String host, int port) {
+    public Client(String host, int port) throws IOException {
         this(host, port, "1111", "GhostUser");
     }
 
