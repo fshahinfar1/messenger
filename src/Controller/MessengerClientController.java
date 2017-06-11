@@ -51,6 +51,8 @@ public class MessengerClientController implements Initializable {
     private MenuItem closeMenuItem;
     @FXML
     private MenuItem aboutMenuItem;
+    @FXML
+    private MenuItem signoutMenuItem;
 
     private Client user;
     private DataInputStream dis;
@@ -144,6 +146,7 @@ public class MessengerClientController implements Initializable {
         closeMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                beforeClose();
                 Platform.exit();
             }
         });// end of close menuItem
@@ -174,7 +177,16 @@ public class MessengerClientController implements Initializable {
                     });
                 }
             }
-        });
+        });  // end of about menuItem
+
+        // signout menuItem
+        signoutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                beforeClose();
+                loadLogin();
+            }
+        });// end of signout menuItem
     }
 
     private void listenForServer() {
@@ -185,7 +197,7 @@ public class MessengerClientController implements Initializable {
                 while (true) {
                     // if it is interrupted close the thread
                     if (Thread.currentThread().isInterrupted()) {
-                        break;
+                        return;
                     }
                     // get message from server
                     try {
@@ -310,4 +322,18 @@ public class MessengerClientController implements Initializable {
         flagAboutWindow = true;
     }
 
+    private void loadLogin(){
+        try{
+            // load fxml
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass()
+                    .getResource("/view/clientMessengerLogin.fxml"));
+            Parent root = fxmlLoader.load();
+            // create the scene
+            Scene scene = new Scene(root, 600, 400);
+            Main.stage.setScene(scene);
+            Main.stage.show();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 }

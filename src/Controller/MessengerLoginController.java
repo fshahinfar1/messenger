@@ -215,7 +215,7 @@ public class MessengerLoginController implements Initializable {
                     aboutStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
                         @Override
                         public void handle(WindowEvent event) {
-                            aboutWindowBeforeCloes();
+                            aboutWindowBeforeClose();
                         }
                     });
                 }
@@ -224,7 +224,7 @@ public class MessengerLoginController implements Initializable {
 
     }
 
-    private void aboutWindowBeforeCloes(){
+    private void aboutWindowBeforeClose(){
         flagAboutWindow = true;
     }
 

@@ -23,10 +23,11 @@
       <RowConstraints maxHeight="300.0" minHeight="100.0" prefHeight="140.0" vgrow="ALWAYS" />
    </rowConstraints>
    <children>
-      <MenuBar prefHeight="25.0" prefWidth="Infinity" maxHeight="25.0" minHeight="25.0" GridPane.columnSpan="2147483647">
+      <MenuBar maxHeight="25.0" minHeight="25.0" prefHeight="25.0" prefWidth="Infinity" GridPane.columnSpan="2147483647">
          <menus>
             <Menu mnemonicParsing="false" text="File">
                <items>
+                  <MenuItem fx:id="signoutMenuItem" mnemonicParsing="false" text="sign out" />
                   <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
                </items>
             </Menu>
