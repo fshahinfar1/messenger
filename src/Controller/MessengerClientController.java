@@ -21,6 +21,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.json.simple.JSONArray;
@@ -195,9 +196,9 @@ public class MessengerClientController implements Initializable {
         exportMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                // todo: get output address from user
                 // open export file
-                File exportFile = new File("chat_history.txt");
+                FileChooser fileChooser = new FileChooser();
+                File exportFile = fileChooser.showSaveDialog(Main.stage);
                 PrintWriter writer = null;
                 try {
                     writer = new PrintWriter(exportFile);
