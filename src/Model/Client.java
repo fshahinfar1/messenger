@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Executors;
 
 /**
  * Created by fsh on 5/25/17.
@@ -44,7 +45,6 @@ public class Client {
     public void send(Message message) throws IOException {
         dos.writeUTF(message.toString());
         dos.flush();
-//        System.out.println("Sent");
     }
 
     public void send(String content, Type type) throws IOException {

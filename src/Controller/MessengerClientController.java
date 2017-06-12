@@ -34,6 +34,7 @@ import java.io.*;
 import java.net.SocketException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +44,8 @@ public class MessengerClientController implements Initializable {
 
     @FXML
     private Button sendButton;
+    @FXML
+    private Button sendFileButton;
     @FXML
     private TextArea chatTextArea;
     @FXML
@@ -94,19 +97,51 @@ public class MessengerClientController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         // send button
         sendButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 String text = chatTextArea.getText() + "\n";
-                try {
-                    user.send(text);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            synchronized (this) {
+                                user.send(text);
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
                 chatTextArea.clear();
             }
-        });
+        });  // end of send button
+
+        //fileSend button
+        sendFileButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                FileChooser fileChooser = new FileChooser();
+                List<File> files  = fileChooser.showOpenMultipleDialog(Main.stage);
+                String filePath = null;
+                for(File file : files){
+                    filePath = file.getAbsolutePath();
+                    System.out.println(filePath);
+                    executor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            System.out.println("before start");
+                            sendFile(file);
+                            System.out.println("start");
+                        }
+                    });
+                }
+
+            }
+        });  // end of fileSend button
+
         // drag over chat TextArea
         chatTextArea.setOnDragOver(new EventHandler<DragEvent>() {
             // accecpt draging over
@@ -118,7 +153,8 @@ public class MessengerClientController implements Initializable {
                 }
                 event.acceptTransferModes(TransferMode.COPY);
             }
-        });
+        }); // end of on drag over
+
         chatTextArea.setOnDragDropped(new EventHandler<DragEvent>() {
             // handle drop event
             @Override
@@ -144,7 +180,7 @@ public class MessengerClientController implements Initializable {
                 event.setDropCompleted(success);
                 event.consume();
             }
-        });
+        });  // end of on drag droped
 
         // close menuItem
         closeMenuItem.setOnAction(new EventHandler<ActionEvent>() {
@@ -153,7 +189,7 @@ public class MessengerClientController implements Initializable {
                 beforeClose();
                 Platform.exit();
             }
-        });// end of close menuItem
+        });  // end of close menuItem
 
         // about menuItem
         aboutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
@@ -190,7 +226,7 @@ public class MessengerClientController implements Initializable {
                 beforeClose();
                 loadLogin();
             }
-        });// end of signout menuItem
+        });  // end of signout menuItem
 
         // export menuItem
         exportMenuItem.setOnAction(new EventHandler<ActionEvent>() {
@@ -218,7 +254,7 @@ public class MessengerClientController implements Initializable {
                 }
                 writer.close();
             }
-        });// end of export menuItem
+        });  // end of export menuItem
     }
 
     private void listenForServer() {
@@ -234,10 +270,9 @@ public class MessengerClientController implements Initializable {
                     // get message from server
                     try {
                         message = new Message(dis.readUTF());
-                    } catch (SocketException e) {
-                        break;
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        System.err.println("cant read from server");
+
                     }
                     // handle messages
                     if (message.getMessageType() == Type.textMessage) {
@@ -328,14 +363,18 @@ public class MessengerClientController implements Initializable {
                 fileData.put("content",tmp );
                 fileData.put("status", "SENDING");
                 fileData.put("length", String.valueOf(count));
-                user.send(fileData.toString(), Type.fileMessage);
+                synchronized (this) {
+                    user.send(fileData.toString(), Type.fileMessage);
+                }
             }
             JSONObject fileData = new JSONObject();
             fileData.put(prefix+"name", file.getName());
             fileData.put("content","" );
             fileData.put("status", "DONE");
             fileData.put("length", 0);
-            user.send(fileData.toString(), Type.fileMessage);
+            synchronized (this) {
+                user.send(fileData.toString(), Type.fileMessage);
+            }
         }catch (IOException e){
             e.printStackTrace();
         }
