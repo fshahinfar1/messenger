@@ -22,6 +22,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.json.simple.JSONArray;
@@ -60,6 +61,8 @@ public class MessengerClientController implements Initializable {
     private MenuItem signoutMenuItem;
     @FXML
     private MenuItem exportMenuItem;
+    @FXML
+    private MenuItem settingMenuItem;
 
     private Client user;
     private DataInputStream dis;
@@ -255,6 +258,14 @@ public class MessengerClientController implements Initializable {
                 writer.close();
             }
         });  // end of export menuItem
+
+        // setting menuItem
+        settingMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                loadSettingWindow();
+            }
+        });  // end of setting menuItem
     }
 
     private void listenForServer() {
@@ -412,6 +423,24 @@ public class MessengerClientController implements Initializable {
             Scene scene = new Scene(root, 600, 400);
             Main.stage.setScene(scene);
             Main.stage.show();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSettingWindow(){
+        try {
+            // load setting stage
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clientSetting.fxml"));
+            Parent root = loader.load();
+            Stage settingStage =  new Stage();
+            settingStage.setTitle("Setting");
+            settingStage.setScene(new Scene(root));
+//                    settingStage.show();
+            // disable current stage
+            settingStage.initModality(Modality.WINDOW_MODAL);
+            settingStage.initOwner(Main.stage);
+            settingStage.showAndWait();
         }catch (IOException e){
             e.printStackTrace();
         }

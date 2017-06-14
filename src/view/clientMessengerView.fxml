@@ -28,6 +28,7 @@
             <Menu mnemonicParsing="false" text="File">
                <items>
                   <MenuItem fx:id="exportMenuItem" mnemonicParsing="false" text="export history" />
+                  <MenuItem fx:id="settingMenuItem" mnemonicParsing="false" text="Setting"/>
                   <MenuItem fx:id="signoutMenuItem" mnemonicParsing="false" text="sign out" />
                   <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
                </items>

@@ -38,7 +38,7 @@ public class SettingController implements Initializable {
     @FXML
     private Label promptLabel;
 
-    private String settingFileAddress = "data/setting.txt";
+    private static String settingFileAddress = "data/setting.txt";
     private File settingFile = new File(settingFileAddress);
 
     @Override
@@ -70,13 +70,8 @@ public class SettingController implements Initializable {
                 // get ip and port form input
                 String ip = ipTextField.getText();
                 String port = portTextField.getText();
-                // check ip and port
-                if (ip.equals("")) {
-                    promptLabel.setText("ip field can't left empty");
-                    return;
-                }
-                if (ip.equals("")) {
-                    promptLabel.setText("port field can't left empty");
+                // check ip and port to be valid
+                if(!checkInput()){
                     return;
                 }
                 // write ip and port to the file in JSON format
@@ -109,13 +104,8 @@ public class SettingController implements Initializable {
                 // get ip and port form input
                 String ip = ipTextField.getText();
                 String port = portTextField.getText();
-                // check ip and port
-                if (ip.equals("")) {
-                    promptLabel.setText("ip field can't left empty");
-                    return;
-                }
-                if (ip.equals("")) {
-                    promptLabel.setText("port field can't left empty");
+                // check ip and port to be valid
+                if(!checkInput()){
                     return;
                 }
                 // test connection
@@ -123,16 +113,77 @@ public class SettingController implements Initializable {
                 try {
                     testClient = new Client(ip, Integer.parseInt(port));
                     promptLabel.setText("connected to server");
+                    testClient.close();
                 } catch (IOException e) {
-                    try {
-                        testClient.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                    e.printStackTrace();
+//                    e.printStackTrace();
                     promptLabel.setText("couldn't connect to server");
                 }
             }
         });  // end of test button
+    }
+
+    private boolean checkInput(){
+        // get ip and port form input
+        String ip = ipTextField.getText();
+        String port = portTextField.getText();
+        // check ip and port not to be empty
+        if (ip.equals("")) {
+            promptLabel.setText("ip field can't left empty");
+            return false;
+        }
+        if (port.equals("")) {
+            promptLabel.setText("port field can't left empty");
+            return false;
+        }
+        // port should be integer
+        try{
+            Integer.parseInt(port);
+        }catch (Exception e){
+            promptLabel.setText("port field should be integer");
+            return false;
+        }
+        // it is okay then
+        return true;
+    }
+
+    // get port from setting file
+    public static int getSettingFilePort() throws RuntimeException{
+        String configStr = "";
+        try (Scanner reader = new Scanner(settingFileAddress)) {
+            while (reader.hasNext()) {
+                configStr += reader.nextLine();
+            }
+        }
+        // show last setting
+        try {
+            JSONObject config = (JSONObject) new JSONParser().parse(configStr);
+            String ip = (String) config.get("ip");
+            String portStr = (String) config.get("port");
+            int port = Integer.parseInt(portStr);
+            return port;
+        } catch (ParseException e) {
+            System.err.println("couldn't parse config string");
+            throw new RuntimeException("couldn't get setting");
+        }
+    }
+
+    // get ip from setting file
+    public static String getSettingFileIp() throws RuntimeException{
+        String configStr = "";
+        try (Scanner reader = new Scanner(settingFileAddress)) {
+            while (reader.hasNext()) {
+                configStr += reader.nextLine();
+            }
+        }
+        // show last setting
+        try {
+            JSONObject config = (JSONObject) new JSONParser().parse(configStr);
+            String ip = (String) config.get("ip");
+            String portStr = (String) config.get("port");
+            return ip;
+        } catch (ParseException e) {
+            System.err.println("couldn't parse config string");
+            throw new RuntimeException("couldn't get setting");
+        }
     }
 }

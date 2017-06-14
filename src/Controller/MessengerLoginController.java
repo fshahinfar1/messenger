@@ -13,6 +13,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.json.simple.JSONObject;
@@ -43,6 +44,8 @@ public class MessengerLoginController implements Initializable {
     private MenuItem aboutMenuItem;
     @FXML
     private MenuItem closeMenuItem;
+    @FXML
+    private MenuItem settingMenuItem;
 
     private boolean flagAboutWindow = true;
 
@@ -119,7 +122,7 @@ public class MessengerLoginController implements Initializable {
                     e.printStackTrace();
                 }
             }
-        });
+        });  // end of login button
         // create button
         createButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -185,7 +188,7 @@ public class MessengerLoginController implements Initializable {
                     e.printStackTrace();
                 }
             }
-        }); // end of create button
+        });  // end of create button
 
         // close menuItem
         closeMenuItem.setOnAction(new EventHandler<ActionEvent>() {
@@ -193,8 +196,9 @@ public class MessengerLoginController implements Initializable {
             public void handle(ActionEvent event) {
                 Platform.exit();
             }
-        });// end of close menuItem
+        });  // end of close menuItem
 
+        // about menuItem
         aboutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -220,12 +224,38 @@ public class MessengerLoginController implements Initializable {
                     });
                 }
             }
-        });
+        });  // end of about menuItem
+
+        // setting menuItem
+        settingMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                loadSettingWindow();
+            }
+        });  // end of setting menuItem
 
     }
 
     private void aboutWindowBeforeClose(){
         flagAboutWindow = true;
+    }
+
+    private void loadSettingWindow(){
+        try {
+            // load setting stage
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clientSetting.fxml"));
+            Parent root = loader.load();
+            Stage settingStage =  new Stage();
+            settingStage.setTitle("Setting");
+            settingStage.setScene(new Scene(root));
+//                    settingStage.show();
+            // disable current stage
+            settingStage.initModality(Modality.WINDOW_MODAL);
+            settingStage.initOwner(Main.stage);
+            settingStage.showAndWait();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     private void loadMessengerView(Client user){

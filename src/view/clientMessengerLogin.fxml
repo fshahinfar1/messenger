@@ -32,6 +32,7 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
+              <MenuItem fx:id="settingMenuItem" mnemonicParsing="false" text="Setting"/>
               <MenuItem fx:id="closeMenuItem" mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
