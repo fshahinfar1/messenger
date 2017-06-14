@@ -91,7 +91,7 @@ public class MessengerClientController implements Initializable {
         // start listen for server
         listenForServer();
         System.out.println("listening on servers port");
-        // get users
+        // ask for online users from server
         try {
             user.send("GET", Type.clientRequestUserList);
         } catch (IOException e) {
@@ -272,7 +272,13 @@ public class MessengerClientController implements Initializable {
                         message = new Message(dis.readUTF());
                     } catch (IOException e) {
                         System.err.println("cant read from server");
-
+                        executor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                connectionLost();
+                            }
+                        });
+                        return;
                     }
                     // handle messages
                     if (message.getMessageType() == Type.textMessage) {
@@ -377,6 +383,7 @@ public class MessengerClientController implements Initializable {
             }
         }catch (IOException e){
             e.printStackTrace();
+            System.err.println("couldn't send the file");
         }
         System.out.println("File has been sent");
     }
@@ -406,6 +413,44 @@ public class MessengerClientController implements Initializable {
             Main.stage.setScene(scene);
             Main.stage.show();
         }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    private void connectionLost(){
+        System.out.println("*** connection lost ***");
+        // stop every thing client is doing
+        beforeClose();
+        // try to start again
+        while(true) {
+            // while your not connected try to connect to server
+            try {
+                user = new Client("localhost", 1234, user.getId(), user.getClientName());
+                break;
+            } catch (IOException e) {
+                System.err.println("couldn't connect");
+            }
+
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                System.err.println("re-try connecting ...");
+            }
+        }
+        System.out.println("Connected to Server");
+        try {
+            dis = user.getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // start the thread pool again
+        executor = Executors.newCachedThreadPool();
+        // listen for server
+        listenForServer();
+        // ask for online users from server
+        try {
+            user.send("GET", Type.clientRequestUserList);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
