@@ -71,8 +71,10 @@ public class MessengerLoginController implements Initializable {
                 // todo: this id should come from server and get updated
                 // todo: should create a client for every click???
                 Client user = null;
+                String ip = SettingController.getSettingFileIp();
+                int port = SettingController.getSettingFilePort();
                 try {
-                     user = new Client("localhost", 1234, "0", userName);
+                     user = new Client(ip, port, "0", userName);
                 }catch (IOException e){
                     promptLabel.setText("problem connecting to server");
                     return;
@@ -142,9 +144,11 @@ public class MessengerLoginController implements Initializable {
                 // create client and data input stream (DIS)
                 // todo: this id should come from server and get updated
                 // todo: should create a client for every click???
+                String ip = SettingController.getSettingFileIp();
+                int port = SettingController.getSettingFilePort();
                 Client user = null;
                 try {
-                    user = new Client("localhost", 1234, "0", userName);
+                    user = new Client(ip, port, "0", userName);
                 }catch (IOException e){
                     promptLabel.setText("problem connecting to server");
                     return;

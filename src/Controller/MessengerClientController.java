@@ -453,8 +453,10 @@ public class MessengerClientController implements Initializable {
         // try to start again
         while(true) {
             // while your not connected try to connect to server
+            String ip = SettingController.getSettingFileIp();
+            int port = SettingController.getSettingFilePort();
             try {
-                user = new Client("localhost", 1234, user.getId(), user.getClientName());
+                user = new Client(ip, port, user.getId(), user.getClientName());
                 break;
             } catch (IOException e) {
                 System.err.println("couldn't connect");
