@@ -8,19 +8,20 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.111">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.SettingController">
   <columnConstraints>
       <ColumnConstraints hgrow="ALWAYS" maxWidth="194.0" minWidth="10.0" prefWidth="63.0" />
     <ColumnConstraints hgrow="NEVER" maxWidth="373.0" minWidth="10.0" prefWidth="122.0" />
-    <ColumnConstraints hgrow="ALWAYS" maxWidth="493.0" minWidth="10.0" prefWidth="252.0" />
-      <ColumnConstraints hgrow="NEVER" maxWidth="493.0" minWidth="10.0" prefWidth="131.0" />
-      <ColumnConstraints hgrow="ALWAYS" maxWidth="493.0" minWidth="10.0" prefWidth="62.0" />
+    <ColumnConstraints hgrow="SOMETIMES" maxWidth="493.0" minWidth="10.0" prefWidth="252.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="493.0" minWidth="10.0" prefWidth="131.0" />
+      <ColumnConstraints hgrow="SOMETIMES" maxWidth="493.0" minWidth="10.0" prefWidth="62.0" />
   </columnConstraints>
   <rowConstraints>
-    <RowConstraints maxHeight="116.0" minHeight="10.0" prefHeight="116.0" vgrow="ALWAYS" />
-    <RowConstraints maxHeight="121.0" minHeight="0.0" prefHeight="35.0" vgrow="NEVER" />
-    <RowConstraints maxHeight="200.0" minHeight="3.0" prefHeight="54.0" vgrow="NEVER" />
-      <RowConstraints maxHeight="273.0" minHeight="10.0" prefHeight="195.0" vgrow="ALWAYS" />
+    <RowConstraints maxHeight="126.0" minHeight="10.0" prefHeight="114.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="121.0" minHeight="0.0" prefHeight="37.0" vgrow="SOMETIMES" />
+    <RowConstraints maxHeight="200.0" minHeight="3.0" prefHeight="39.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="288.0" minHeight="10.0" prefHeight="179.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="273.0" minHeight="10.0" prefHeight="45.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
       <Label text="Server IP" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -31,7 +32,9 @@
          <children>
             <Button fx:id="applyButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="apply" />
             <Button fx:id="cancelButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="cancel" />
+            <Button fx:id="testButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefHeight="34.0" text="test connection" />
          </children>
       </VBox>
+      <Label fx:id="promptLabel" text="setting" GridPane.columnIndex="2" GridPane.rowIndex="4" />
    </children>
 </GridPane>
