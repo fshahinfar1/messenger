@@ -45,22 +45,27 @@ public class SettingController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // read last setting
         String configStr = "";
-        try (Scanner reader = new Scanner(settingFile)) {
-            while (reader.hasNext()) {
-                configStr += reader.nextLine();
+        if(settingFile.exists()) {
+            try (Scanner reader = new Scanner(settingFile)) {
+                while (reader.hasNext()) {
+                    configStr += reader.nextLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // show last setting
-        try {
-            JSONObject config = (JSONObject) new JSONParser().parse(configStr);
-            String ip = (String) config.get("ip");
-            String port = (String) config.get("port");
-            ipTextField.setText(ip);
-            portTextField.setText(port);
-        } catch (ParseException e) {
-            System.err.println("couldn't parse config string");
+            // show last setting
+            try {
+                JSONObject config = (JSONObject) new JSONParser().parse(configStr);
+                String ip = (String) config.get("ip");
+                String port = (String) config.get("port");
+                ipTextField.setText(ip);
+                portTextField.setText(port);
+            } catch (ParseException e) {
+                System.err.println("couldn't parse config string");
+                promptLabel.setText("setting configuration is wrong, please set it again.");
+            }
+        }else{
+            promptLabel.setText("setting is not configured yet, please set it.");
         }
 
         // apply button
@@ -149,10 +154,12 @@ public class SettingController implements Initializable {
     // get port from setting file
     public static int getSettingFilePort() throws RuntimeException{
         String configStr = "";
-        try (Scanner reader = new Scanner(settingFileAddress)) {
+        try (Scanner reader = new Scanner(new File(settingFileAddress))) {
             while (reader.hasNext()) {
                 configStr += reader.nextLine();
             }
+        }catch(IOException e){
+            System.out.println("couldn't work with file");
         }
         // show last setting
         try {
@@ -170,10 +177,12 @@ public class SettingController implements Initializable {
     // get ip from setting file
     public static String getSettingFileIp() throws RuntimeException{
         String configStr = "";
-        try (Scanner reader = new Scanner(settingFileAddress)) {
+        try (Scanner reader = new Scanner(new File(settingFileAddress))) {
             while (reader.hasNext()) {
                 configStr += reader.nextLine();
             }
+        }catch(IOException e){
+            System.out.println("couldn't work with file");
         }
         // show last setting
         try {

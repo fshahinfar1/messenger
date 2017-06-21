@@ -199,7 +199,7 @@ public class Server {
                     password = (String) accountData.get("password");
                 } catch (ParseException e) {
                     System.err.println("couldn't get username and password due to parse issue");
-                    e.printStackTrace();
+//                    e.printStackTrace();
                     JSONObject sendStatus = new JSONObject();
                     sendStatus.put("status", "FAILED");
                     sendTo(sendStatus.toString(), Type.loginRequest, client);
@@ -239,7 +239,7 @@ public class Server {
                         connectedUsers.remove(client);
                     }
                     client.close();
-                    break;
+                    return;
                 }
                 // end of loginRequest
             } else if (message.getMessageType() == Type.createRequest) {

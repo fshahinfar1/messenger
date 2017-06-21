@@ -71,8 +71,18 @@ public class MessengerLoginController implements Initializable {
                 // todo: this id should come from server and get updated
                 // todo: should create a client for every click???
                 Client user = null;
-                String ip = SettingController.getSettingFileIp();
-                int port = SettingController.getSettingFilePort();
+                // load setting to create a connection
+                String ip="";
+                int port = 0;
+                try {
+                    ip = SettingController.getSettingFileIp();
+                    port = SettingController.getSettingFilePort();
+                }catch (RuntimeException ex){
+                    promptLabel.setText("Couldn't load setting file");
+                    loadSettingWindow();
+                    return;
+                }
+                // connect to server
                 try {
                      user = new Client(ip, port, "0", userName);
                 }catch (IOException e){
@@ -144,8 +154,17 @@ public class MessengerLoginController implements Initializable {
                 // create client and data input stream (DIS)
                 // todo: this id should come from server and get updated
                 // todo: should create a client for every click???
-                String ip = SettingController.getSettingFileIp();
-                int port = SettingController.getSettingFilePort();
+                // load setting to create a connection
+                String ip="";
+                int port = 0;
+                try {
+                    ip = SettingController.getSettingFileIp();
+                    port = SettingController.getSettingFilePort();
+                }catch (RuntimeException ex){
+                    promptLabel.setText("Couldn't load setting file");
+                    loadSettingWindow();
+                    return;
+                };
                 Client user = null;
                 try {
                     user = new Client(ip, port, "0", userName);
