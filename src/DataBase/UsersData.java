@@ -36,6 +36,24 @@ public class UsersData extends DataBaseManager {
         }
     }
 
+    public String getUserName(String id) throws SQLException {
+        // todo: working here ...
+        String sql = "SELECT username FROM " + tableName + " WHERE id=" + "\"" + id + "\"" + "LIMIT 1";
+        ResultSet rs = null;
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(sql);
+            return rs.getString("username");
+        }finally {
+            try {
+                rs.close();
+            } catch (SQLException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void insertUserData(String userName, String password, String id) throws SQLException{
         String sql = String.format("INSERT INTO %s (id, username, password) VALUES(%s,'%s','%s')",
                 tableName, id,userName,password);
