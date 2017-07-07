@@ -1,6 +1,7 @@
 package Model;
 
 import DataBase.DataBaseManager;
+import DataBase.MessageHistory;
 import DataBase.UsersData;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
@@ -38,7 +39,8 @@ public class Server {
     private Date date;
     private DateFormat dFormat;
     private UsersData db;
-    private File chatHistory;
+    private MessageHistory mhdb; // message history database
+//    private File chatHistory;
 
     private ListView onlineUsers;
 
@@ -51,11 +53,17 @@ public class Server {
         System.out.println("Start Server on port: " + port);
         flagRun = true;
         id = "SERVER-0";
-        chatHistory = new File("data/history/" + "fileTest" + ".txt");
+//        chatHistory = new File("data/history/" + "fileTest" + ".txt");
         try {
             db = new UsersData("jdbc:sqlite:data/database/users.db", "users_data");
         } catch (SQLException e) {
             System.err.println("couldn't connect to db");
+            e.printStackTrace();
+        }
+        try{
+            mhdb = new MessageHistory("jdbc:sqlite:data/database/history.db", "MessageHistory");
+        }catch (SQLException e){
+            System.err.println("couldn't connect to mhdb");
             e.printStackTrace();
         }
         listenForClient();
@@ -153,6 +161,12 @@ public class Server {
                 // todo: first fix the file manager
 //                FileManager fileManager = new FileManager(this.chatHistory);
 //                fileManager.InsertMessage(message);
+                try {
+                    mhdb.InsertMessage(message);
+                } catch (SQLException e) {
+                    System.err.println("Couldn't insert message to mhdb");
+                    e.printStackTrace();
+                }
             } else if (message.getMessageType() == Type.fileMessage) {
                 // todo: send the file
                 JSONObject fileData = null;
