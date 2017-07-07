@@ -10,7 +10,7 @@ import java.util.HashMap;
  */
 public class UsersData extends DataBaseManager {
 
-    public UsersData(String url, String tableName) throws  SQLException{
+    public UsersData(String url, String tableName) throws SQLException {
         super(url, tableName);
     }
 
@@ -27,10 +27,10 @@ public class UsersData extends DataBaseManager {
             result.put("id", rs.getString("id"));
             result.put("password", rs.getString("password"));
             return result;
-        }finally {
+        } finally {
             try {
                 rs.close();
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
@@ -44,19 +44,20 @@ public class UsersData extends DataBaseManager {
         try {
             stmt = connection.createStatement();
             rs = stmt.executeQuery(sql);
-            return rs.getString("username");
-        }finally {
+            String result = rs.getString("username");
+            return result;
+        } finally {
             try {
                 rs.close();
-            } catch (SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void insertUserData(String userName, String password, String id) throws SQLException{
+    public void insertUserData(String userName, String password, String id) throws SQLException {
         String sql = String.format("INSERT INTO %s (id, username, password) VALUES(%s,'%s','%s')",
-                tableName, id,userName,password);
+                tableName, id, userName, password);
         Statement stmt = connection.createStatement();
         stmt.executeUpdate(sql);
         stmt.close();

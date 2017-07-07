@@ -186,7 +186,17 @@ public class Server {
             } else if (message.getMessageType() == Type.clientRequestUserList) {
                 JSONArray users = new JSONArray();
                 //todo: should I send to all users
-                users.addAll(connectedUsers.keySet());
+                List<String> userNames = new ArrayList<String>();
+                for(String i: connectedUsers.keySet()){
+                    String un = "";
+                    try{
+                        un = db.getUserName(i);
+                    }catch (SQLException e){
+                        e.printStackTrace();
+                    }
+                    userNames.add(un);
+                }
+                users.addAll(userNames);
                 sendToAll(users.toString(), Type.clientRequestUserList);
             } else if (message.getMessageType() == Type.loginRequest) {
                 // get user data from message
@@ -316,12 +326,24 @@ public class Server {
         // remove disconnected users from the HashMap
         this.connectedUsers.remove(id);
         if (this.onlineUsers != null) {
+            String un = "";
+            try {
+                un = db.getUserName(id);
+            } catch (SQLException e) {
+                return;
+            }
+
+            final String userName = un;
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
                     ObservableList tmp = onlineUsers.getItems();
-                    tmp.remove(id);
+                    tmp.remove(userName);
                     onlineUsers.setItems(tmp);
+                    Iterator<String> iter = tmp.iterator();
+                    while(iter.hasNext()){
+                        System.out.println(iter.next());
+                    }
                 }
             });
         }
@@ -331,11 +353,19 @@ public class Server {
         // add client to connectedUsers
         this.connectedUsers.put(id, client);
         if (this.onlineUsers != null) {
+            String un = "";
+            try {
+                un = db.getUserName(id);
+            } catch (SQLException e) {
+                return;
+            }
+
+            final String userName = un;
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
                     ObservableList tmp = onlineUsers.getItems();
-                    tmp.add(id);
+                    tmp.add(userName);
                     onlineUsers.setItems(tmp);
                 }
             });

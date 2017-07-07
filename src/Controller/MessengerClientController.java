@@ -317,7 +317,12 @@ public class MessengerClientController implements Initializable {
                         String arrayString = message.getContent();
                         try {
                             JSONArray arr = (JSONArray) new JSONParser().parse(arrayString);
-                            usersListView.setItems(new ObservableListWrapper(arr));
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    usersListView.setItems(new ObservableListWrapper(arr));
+                                }
+                            });
                         } catch (ParseException e) {
                             System.out.println("couldn't parse");
                             System.out.println(arrayString);
