@@ -1,6 +1,7 @@
 package Model;
 
 import DataBase.DataBaseManager;
+import DataBase.UsersData;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import javafx.application.Platform;
@@ -36,7 +37,7 @@ public class Server {
 
     private Date date;
     private DateFormat dFormat;
-    private DataBaseManager db;
+    private UsersData db;
     private File chatHistory;
 
     private ListView onlineUsers;
@@ -52,7 +53,7 @@ public class Server {
         id = "SERVER-0";
         chatHistory = new File("data/history/" + "fileTest" + ".txt");
         try {
-            db = new DataBaseManager("jdbc:sqlite:data/database/users.db");
+            db = new UsersData("jdbc:sqlite:data/database/users.db", "users_data");
         } catch (SQLException e) {
             System.err.println("couldn't connect to db");
             e.printStackTrace();
@@ -252,7 +253,7 @@ public class Server {
                 }
                 // todo: I should use a better id
 //                    String id = UUID.randomUUID().toString();
-                String userId = String.valueOf(db.getLastID() + 1);
+                String userId = String.valueOf(db.getLastID("id") + 1);
                 // inser data into database
                 try {
                     db.insertUserData(userName, password, userId);

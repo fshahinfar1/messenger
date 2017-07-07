@@ -8,13 +8,13 @@ import java.util.HashMap;
  * Created by fsh on 5/31/17.
  */
 public class DataBaseManager {
-    private Connection connection;
-    private String tableName;
-    private String url;
+    protected Connection connection;
+    protected String tableName;
+    protected String url;
 
-    public DataBaseManager() throws SQLException{
-        tableName = "users_data";
-        url = "jdbc:sqlite:data/database/users.db";
+    public DataBaseManager(String url, String tableName) throws SQLException{
+        this.tableName = tableName;
+        this.url = url;
         connect();
     }
 
@@ -35,60 +35,23 @@ public class DataBaseManager {
         }
     }
 
-    public void selectAll() {
-        String sql = "SELECT * FROM users_data;";
+    public ResultSet selectAll() throws SQLException {
+        String sql = String.format("SELECT * %s;", tableName);
         ResultSet rs = null;
         Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
-
-            while (rs.next()) {
-                System.out.println(rs.getString("userName"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        stmt = connection.createStatement();
+        rs = stmt.executeQuery(sql);
+        return rs;
     }
 
-    public HashMap getUserData(String userName) throws SQLException {
-        // todo: working here ...
-        String sql = "SELECT * FROM " + tableName + " WHERE username=" + "\"" + userName + "\"" + "LIMIT 1";
-        ResultSet rs = null;
-        Statement stmt = null;
-        try {
-            stmt = connection.createStatement();
-            rs = stmt.executeQuery(sql);
-            HashMap<String, String> result = new HashMap<String, String>();
-            result.put("username", rs.getString("username"));
-            result.put("id", rs.getString("id"));
-            result.put("password", rs.getString("password"));
-            return result;
-        }finally {
-            try {
-                rs.close();
-            } catch (SQLException e){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void insertUserData(String userName, String password, String id) throws SQLException{
-        String sql = String.format("INSERT INTO %s (id, username, password) VALUES(%s,'%s','%s')",
-                tableName, id,userName,password);
-        Statement stmt = connection.createStatement();
-        stmt.executeUpdate(sql);
-        stmt.close();
-    }
-
-    public int getLastID(){
+    public int getLastID(String columnName){
         ResultSet rs = null;
         int id=-1;
         try {
-            String sql = String.format("SELECT id FROM %s ORDER BY id DESC LIMIT 1", tableName);
+            String sql = String.format("SELECT %s FROM %s ORDER BY id DESC LIMIT 1", columnName,tableName);
             Statement stmt = connection.createStatement();
             rs = stmt.executeQuery(sql);
-            id=rs.getInt("id");
+            id=rs.getInt(columnName);
         }catch (SQLException e){
             return -1;
         }
@@ -96,7 +59,7 @@ public class DataBaseManager {
     }
 
     public static void main(String[] args) throws SQLException {
-        DataBaseManager db = new DataBaseManager();
+        DataBaseManager db = new DataBaseManager("jdbc:sqlite:data/database/users.db", "users_data");
 //        db.selectAll();
 //        try {
 ////            HashMap<String, String> hm = db.getUserData("Farbod0");
@@ -105,6 +68,6 @@ public class DataBaseManager {
 //        }catch (SQLException e){
 //            System.out.println("No user");
 //        }
-        System.out.println(db.getLastID());
+        System.out.println(db.getLastID("id"));
     }
 }
