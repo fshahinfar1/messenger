@@ -315,7 +315,7 @@ public class Server {
     private synchronized void removeDisconnectedClient(String id) {
         // remove disconnected users from the HashMap
         this.connectedUsers.remove(id);
-        if(this.onlineUsers != null) {
+        if (this.onlineUsers != null) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -330,7 +330,7 @@ public class Server {
     private synchronized void addConnectedClient(String id, Socket client) {
         // add client to connectedUsers
         this.connectedUsers.put(id, client);
-        if(this.onlineUsers != null) {
+        if (this.onlineUsers != null) {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
@@ -348,11 +348,11 @@ public class Server {
         System.out.println("client handler thread went down\n\tclient_id: " + id + "\tname: " + name);
     }
 
-    public void connectListView(ListView l){
+    public void connectListView(ListView l) {
         this.onlineUsers = l;
     }
 
-    public void stop(){
+    public void stop() {
         System.out.println("Server is shutting down...");
         this.executor.shutdownNow();
     }

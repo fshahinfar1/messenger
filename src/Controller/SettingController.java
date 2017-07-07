@@ -45,7 +45,7 @@ public class SettingController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         // read last setting
         String configStr = "";
-        if(settingFile.exists()) {
+        if (settingFile.exists()) {
             try (Scanner reader = new Scanner(settingFile)) {
                 while (reader.hasNext()) {
                     configStr += reader.nextLine();
@@ -64,7 +64,7 @@ public class SettingController implements Initializable {
                 System.err.println("couldn't parse config string");
                 promptLabel.setText("setting configuration is wrong, please set it again.");
             }
-        }else{
+        } else {
             promptLabel.setText("setting is not configured yet, please set it.");
         }
 
@@ -76,7 +76,7 @@ public class SettingController implements Initializable {
                 String ip = ipTextField.getText();
                 String port = portTextField.getText();
                 // check ip and port to be valid
-                if(!checkInput()){
+                if (!checkInput()) {
                     return;
                 }
                 // write ip and port to the file in JSON format
@@ -110,7 +110,7 @@ public class SettingController implements Initializable {
                 String ip = ipTextField.getText();
                 String port = portTextField.getText();
                 // check ip and port to be valid
-                if(!checkInput()){
+                if (!checkInput()) {
                     return;
                 }
                 // test connection
@@ -127,7 +127,7 @@ public class SettingController implements Initializable {
         });  // end of test button
     }
 
-    private boolean checkInput(){
+    private boolean checkInput() {
         // get ip and port form input
         String ip = ipTextField.getText();
         String port = portTextField.getText();
@@ -141,9 +141,9 @@ public class SettingController implements Initializable {
             return false;
         }
         // port should be integer
-        try{
+        try {
             Integer.parseInt(port);
-        }catch (Exception e){
+        } catch (Exception e) {
             promptLabel.setText("port field should be integer");
             return false;
         }
@@ -152,13 +152,13 @@ public class SettingController implements Initializable {
     }
 
     // get port from setting file
-    public static int getSettingFilePort() throws RuntimeException{
+    public static int getSettingFilePort() throws RuntimeException {
         String configStr = "";
         try (Scanner reader = new Scanner(new File(settingFileAddress))) {
             while (reader.hasNext()) {
                 configStr += reader.nextLine();
             }
-        }catch(IOException e){
+        } catch (IOException e) {
             System.out.println("couldn't work with file");
         }
         // show last setting
@@ -175,13 +175,13 @@ public class SettingController implements Initializable {
     }
 
     // get ip from setting file
-    public static String getSettingFileIp() throws RuntimeException{
+    public static String getSettingFileIp() throws RuntimeException {
         String configStr = "";
         try (Scanner reader = new Scanner(new File(settingFileAddress))) {
             while (reader.hasNext()) {
                 configStr += reader.nextLine();
             }
-        }catch(IOException e){
+        } catch (IOException e) {
             System.out.println("couldn't work with file");
         }
         // show last setting

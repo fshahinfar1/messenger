@@ -127,9 +127,9 @@ public class MessengerClientController implements Initializable {
             @Override
             public void handle(ActionEvent event) {
                 FileChooser fileChooser = new FileChooser();
-                List<File> files  = fileChooser.showOpenMultipleDialog(Main.stage);
+                List<File> files = fileChooser.showOpenMultipleDialog(Main.stage);
                 String filePath = null;
-                for(File file : files){
+                for (File file : files) {
                     filePath = file.getAbsolutePath();
                     System.out.println(filePath);
                     executor.execute(new Runnable() {
@@ -151,7 +151,7 @@ public class MessengerClientController implements Initializable {
             @Override
             public void handle(DragEvent event) {
                 Dragboard db = event.getDragboard();
-                if(event.getGestureSource()!= chatTextArea &&db.hasFiles()){
+                if (event.getGestureSource() != chatTextArea && db.hasFiles()) {
                     event.acceptTransferModes(TransferMode.COPY);
                 }
                 event.acceptTransferModes(TransferMode.COPY);
@@ -167,7 +167,7 @@ public class MessengerClientController implements Initializable {
                 if (db.hasFiles()) {
                     success = true;
                     String filePath = null;
-                    for (File file:db.getFiles()) {
+                    for (File file : db.getFiles()) {
                         filePath = file.getAbsolutePath();
                         System.out.println(filePath);
                         executor.execute(new Runnable() {
@@ -198,7 +198,7 @@ public class MessengerClientController implements Initializable {
         aboutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(flagAboutWindow) {
+                if (flagAboutWindow) {
                     flagAboutWindow = false;
                     Stage aboutStage = new Stage();
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/About.fxml"));
@@ -241,14 +241,14 @@ public class MessengerClientController implements Initializable {
                 PrintWriter writer = null;
                 try {
                     writer = new PrintWriter(exportFile);
-                }catch (FileNotFoundException e){
+                } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
                 // read history
                 System.out.println(messageVBox.getChildren().size());
-                for(int i=0;i<messageVBox.getChildren().size();i++){
+                for (int i = 0; i < messageVBox.getChildren().size(); i++) {
                     Node n = ((HBox) messageVBox.getChildren().get(i)).getChildren().get(0);
-                    if(n instanceof Label){
+                    if (n instanceof Label) {
                         Label textLabel = (Label) n;
                         String text = textLabel.getText();
                         // write history to export file
@@ -303,7 +303,7 @@ public class MessengerClientController implements Initializable {
                             if (messageAuthor.equals(user.getClientName())) {
                                 baseLine = 2;
                             }
-                            showMessage(messageAuthor+"\n", baseLine);
+                            showMessage(messageAuthor + "\n", baseLine);
                         }
                         // show message
                         int baseLine = 0;
@@ -328,7 +328,7 @@ public class MessengerClientController implements Initializable {
         });
     }
 
-    private void showMessage(String message, int baseLine){
+    private void showMessage(String message, int baseLine) {
         // create label
         Label messageLabel = new Label(message);
         // pack in HBox
@@ -356,12 +356,12 @@ public class MessengerClientController implements Initializable {
         }
     }
 
-    private void sendFile(File file){
+    private void sendFile(File file) {
         System.out.println("start sending a file");
         InputStream reader = null;
         try {
             reader = new FileInputStream(file);
-        }catch (FileNotFoundException e){
+        } catch (FileNotFoundException e) {
             System.err.println("file not found");
             return;
         }
@@ -373,11 +373,11 @@ public class MessengerClientController implements Initializable {
         try {
             while (reader.available() > 0) {
                 Arrays.fill(bytes, (byte) 0);
-                count = reader.read(bytes,0,1024);
+                count = reader.read(bytes, 0, 1024);
                 JSONObject fileData = new JSONObject();
-                fileData.put("name", prefix+file.getName());
-                String tmp = Base64.encode(bytes,count);
-                fileData.put("content",tmp );
+                fileData.put("name", prefix + file.getName());
+                String tmp = Base64.encode(bytes, count);
+                fileData.put("content", tmp);
                 fileData.put("status", "SENDING");
                 fileData.put("length", String.valueOf(count));
                 synchronized (this) {
@@ -385,14 +385,14 @@ public class MessengerClientController implements Initializable {
                 }
             }
             JSONObject fileData = new JSONObject();
-            fileData.put(prefix+"name", file.getName());
-            fileData.put("content","" );
+            fileData.put(prefix + "name", file.getName());
+            fileData.put("content", "");
             fileData.put("status", "DONE");
             fileData.put("length", 0);
             synchronized (this) {
                 user.send(fileData.toString(), Type.fileMessage);
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             System.err.println("couldn't send the file");
         }
@@ -409,12 +409,12 @@ public class MessengerClientController implements Initializable {
         }
     }
 
-    private void aboutWindowBeforeCloes(){
+    private void aboutWindowBeforeCloes() {
         flagAboutWindow = true;
     }
 
-    private void loadLogin(){
-        try{
+    private void loadLogin() {
+        try {
             // load fxml
             FXMLLoader fxmlLoader = new FXMLLoader(getClass()
                     .getResource("/view/clientMessengerLogin.fxml"));
@@ -423,17 +423,17 @@ public class MessengerClientController implements Initializable {
             Scene scene = new Scene(root, 600, 400);
             Main.stage.setScene(scene);
             Main.stage.show();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadSettingWindow(){
+    private void loadSettingWindow() {
         try {
             // load setting stage
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clientSetting.fxml"));
             Parent root = loader.load();
-            Stage settingStage =  new Stage();
+            Stage settingStage = new Stage();
             settingStage.setTitle("Setting");
             settingStage.setScene(new Scene(root));
 //                    settingStage.show();
@@ -441,17 +441,17 @@ public class MessengerClientController implements Initializable {
             settingStage.initModality(Modality.WINDOW_MODAL);
             settingStage.initOwner(Main.stage);
             settingStage.showAndWait();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void connectionLost(){
+    private void connectionLost() {
         System.out.println("*** connection lost ***");
         // stop every thing client is doing
         beforeClose();
         // try to start again
-        while(true) {
+        while (true) {
             // while your not connected try to connect to server
             String ip = SettingController.getSettingFileIp();
             int port = SettingController.getSettingFilePort();

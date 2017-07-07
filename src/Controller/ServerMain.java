@@ -18,7 +18,7 @@ public class ServerMain extends Application {
     public static Stage stage;
 
     @Override
-    public void start(Stage stage) throws Exception{
+    public void start(Stage stage) throws Exception {
         this.stage = stage;
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/serverView.fxml"));
         Parent root = fxmlLoader.load();

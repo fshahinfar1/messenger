@@ -59,11 +59,11 @@ public class MessengerLoginController implements Initializable {
                 String userName = userNameTextField.getText();
                 String password = passwordField.getText();
                 // check input
-                if(userName.equals("")){
+                if (userName.equals("")) {
                     promptLabel.setText("please choose a username");
                     return;
                 }
-                if(password.equals("")){
+                if (password.equals("")) {
                     promptLabel.setText("please choose a password");
                     return;
                 }
@@ -72,20 +72,20 @@ public class MessengerLoginController implements Initializable {
                 // todo: should create a client for every click???
                 Client user = null;
                 // load setting to create a connection
-                String ip="";
+                String ip = "";
                 int port = 0;
                 try {
                     ip = SettingController.getSettingFileIp();
                     port = SettingController.getSettingFilePort();
-                }catch (RuntimeException ex){
+                } catch (RuntimeException ex) {
                     promptLabel.setText("Couldn't load setting file");
                     loadSettingWindow();
                     return;
                 }
                 // connect to server
                 try {
-                     user = new Client(ip, port, "0", userName);
-                }catch (IOException e){
+                    user = new Client(ip, port, "-1", userName);
+                } catch (IOException e) {
                     promptLabel.setText("problem connecting to server");
                     return;
                 }
@@ -117,14 +117,18 @@ public class MessengerLoginController implements Initializable {
                         // if accepted
                         if (((String) answer.get("status")).equals("ACCEPTED")) {
                             System.out.println("login accepted");
-                            // set user id
-                            user.setId((String) answer.get("id"));
+                            String userId = (String) answer.get("id");
+                            // new user with correct id
+                            user.close();  // close login client and craete another one
+                            user = new Client(ip, port, userId, userName);
                             loadMessengerView(user);
                         } else {
-                            if(((String)answer.get("status")).equals("WRONG PASSWORD")) {
+                            if (((String) answer.get("status")).equals("WRONG PASSWORD")) {
                                 promptLabel.setText("wrong password");
-                            }else if(((String)answer.get("status")).equals("FAILED")){
+                            } else if (((String) answer.get("status")).equals("FAILED ? USERNAME")) {
                                 promptLabel.setText("wrong username");
+                            } else if (((String) answer.get("status")).equals("FAILED")) {
+                                promptLabel.setText("exception occured when sending data");
                             }
                             System.out.println(message.getContent());
                         }
@@ -143,11 +147,11 @@ public class MessengerLoginController implements Initializable {
                 String userName = userNameTextField.getText();
                 String password = passwordField.getText();
                 // check input
-                if(userName.equals("")){
+                if (userName.equals("")) {
                     promptLabel.setText("please choose a username");
                     return;
                 }
-                if(password.equals("")){
+                if (password.equals("")) {
                     promptLabel.setText("please choose a password");
                     return;
                 }
@@ -155,20 +159,21 @@ public class MessengerLoginController implements Initializable {
                 // todo: this id should come from server and get updated
                 // todo: should create a client for every click???
                 // load setting to create a connection
-                String ip="";
+                String ip = "";
                 int port = 0;
                 try {
                     ip = SettingController.getSettingFileIp();
                     port = SettingController.getSettingFilePort();
-                }catch (RuntimeException ex){
+                } catch (RuntimeException ex) {
                     promptLabel.setText("Couldn't load setting file");
                     loadSettingWindow();
                     return;
-                };
+                }
+                ;
                 Client user = null;
                 try {
-                    user = new Client(ip, port, "0", userName);
-                }catch (IOException e){
+                    user = new Client(ip, port, "-1", userName);
+                } catch (IOException e) {
                     promptLabel.setText("problem connecting to server");
                     return;
                 }
@@ -187,7 +192,8 @@ public class MessengerLoginController implements Initializable {
                     loginRequestMessage.put("password", password);
                     // send the data to the server and get the result
                     user.send(loginRequestMessage.toString(), Type.createRequest);
-                    Message message = new Message(dis.readUTF());
+                    // todo: while waiting for the result the gui will hang...
+                    Message message = new Message(dis.readUTF());  // wait for the result
                     if (message.getMessageType() == Type.createRequest) {
                         JSONObject answer = null;
                         try {
@@ -197,11 +203,13 @@ public class MessengerLoginController implements Initializable {
                             e.printStackTrace();
                         }
 
-                        if (((String)answer.get("status")).equals("ACCEPTED")) {
-                            user.setId((String) answer.get("id"));
+                        if (((String) answer.get("status")).equals("ACCEPTED")) {
+                            String userId = (String) answer.get("id");
+                            user.close();
+                            user = new Client(ip, port, userId, userName);
                             loadMessengerView(user);
                         } else {
-                            if(((String)answer.get("status")).equals("FAILED ?USED-USERNAME")){
+                            if (((String) answer.get("status")).equals("FAILED ?USED-USERNAME")) {
                                 promptLabel.setText("Username is used.");
                             }
                             System.out.println(message.getContent());
@@ -225,7 +233,7 @@ public class MessengerLoginController implements Initializable {
         aboutMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(flagAboutWindow) {
+                if (flagAboutWindow) {
                     flagAboutWindow = false;
                     Stage aboutStage = new Stage();
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/About.fxml"));
@@ -259,16 +267,16 @@ public class MessengerLoginController implements Initializable {
 
     }
 
-    private void aboutWindowBeforeClose(){
+    private void aboutWindowBeforeClose() {
         flagAboutWindow = true;
     }
 
-    private void loadSettingWindow(){
+    private void loadSettingWindow() {
         try {
             // load setting stage
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/clientSetting.fxml"));
             Parent root = loader.load();
-            Stage settingStage =  new Stage();
+            Stage settingStage = new Stage();
             settingStage.setTitle("Setting");
             settingStage.setScene(new Scene(root));
 //                    settingStage.show();
@@ -276,13 +284,13 @@ public class MessengerLoginController implements Initializable {
             settingStage.initModality(Modality.WINDOW_MODAL);
             settingStage.initOwner(Main.stage);
             settingStage.showAndWait();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadMessengerView(Client user){
-        try{
+    private void loadMessengerView(Client user) {
+        try {
             // load fxml
             FXMLLoader fxmlLoader = new FXMLLoader(getClass()
                     .getResource("/view/clientMessengerView.fxml"));
@@ -302,7 +310,7 @@ public class MessengerLoginController implements Initializable {
                     controller.beforeClose();
                 }
             });
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

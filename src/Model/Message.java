@@ -49,7 +49,7 @@ public class Message {
         return (String) message.get("content");
     }
 
-    public String getMessageId() {
+    public String getAuthorId() {
         return (String) message.get("id");
     }
 

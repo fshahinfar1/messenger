@@ -31,16 +31,16 @@ public class ServerViewController implements Initializable {
         // todo find a better way to make the server
         try {
             server = new Server(1234);
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         server.connectListView(onlineUserListView);
 
-        String ip ="";
-        try{
-                ip = InetAddress.getLocalHost().getHostAddress();
-        }catch (UnknownHostException e){
+        String ip = "";
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
             e.printStackTrace();
             ip = "UnKnown";
         }
@@ -49,7 +49,7 @@ public class ServerViewController implements Initializable {
         portLabel.setText("1234");
     }
 
-    public void beforeClose(){
+    public void beforeClose() {
         server.stop();
     }
 }
