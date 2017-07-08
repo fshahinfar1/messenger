@@ -14,26 +14,31 @@ public class MessageHistory extends DataBaseManager {
         super(url, tableName);
     }
 
-    public void InsertMessage(String message, String date) throws SQLException{
-        String sql = String.format("INSERT INTO %s(rowid, message, date) VALUES(NULL, \"%s\", \"%s\")",
-                tableName, message, date);
+    public void InsertMessage(String message, String authorId, int date) throws SQLException{
+        String sql = String.format("INSERT INTO %s(rowid, message, authorId, date) VALUES(NULL, \"%s\", \"%s\", %s)",
+                tableName, message, authorId, date);
         Statement stmt = connection.createStatement();
         stmt.executeUpdate(sql);
         stmt.close();
     }
     public void InsertMessage(Message message) throws SQLException{
         String m = message.getContent();
-        String date = message.getMessageDate();
-        InsertMessage(m, date);
+        String authorId = message.getAuthorId();
+        int date = message.getMessageDate();
+        InsertMessage(m, authorId, date);
     }
 
     public void clear() throws SQLException{
         String sql = String.format("DROP TABLE %s;",tableName);
         Statement stmt = connection.createStatement();
         stmt.executeUpdate(sql);
-        sql = String.format("CREATE TABLE MessageHistory ( rowid INTEGER NOT NULL PRIMARY KEY, message TEXT, date TEXT NOT NULL);");
+        sql = String.format("CREATE TABLE MessageHistory(rowid INTEGER NOT NULL PRIMARY KEY, message TEXT, authorId TEXT, date INTEGER);");
         stmt.executeUpdate(sql);
         stmt.close();
+    }
+
+    public void getMessagesBeforeDate(String date){
+
     }
 
     public static void main(String[] args) throws SQLException{

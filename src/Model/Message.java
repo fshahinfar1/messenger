@@ -10,7 +10,7 @@ public class Message {
 
     private JSONObject message;
 
-    public Message(String content, Type type, String id, String userName, String date) {
+    public Message(String content, Type type, String id, String userName, long date) {
         message = new JSONObject();
         message.put("type", type.name());
         message.put("content", content);
@@ -57,8 +57,8 @@ public class Message {
         return (String) message.get("author");
     }
 
-    public String getMessageDate() {
-        return (String) message.get("date");
+    public int getMessageDate() {
+        return (int) message.get("date");
     }
 
     @Override

@@ -311,11 +311,11 @@ public class Server {
     }
 
     private synchronized void sendToAll(String message) {
-        sendToAll(new Message(message, Type.textMessage, id, "SERVER", dFormat.format(date.getTime())));
+        sendToAll(new Message(message, Type.textMessage, id, "SERVER", (int)(date.getTime()/1000)));
     }
 
     private synchronized void sendToAll(String message, Type type) {
-        sendToAll(new Message(message, type, id, "SERVER", dFormat.format(date.getTime())));
+        sendToAll(new Message(message, type, id, "SERVER", (int)(date.getTime()/1000)));
     }
 
     private synchronized void sendTo(Message message, Socket c) {
@@ -329,11 +329,11 @@ public class Server {
     }
 
     private synchronized void sendTo(String message, Type type, Socket c) {
-        sendTo(new Message(message, type, id, "SERVER", dFormat.format(date.getTime())), c);
+        sendTo(new Message(message, type, id, "SERVER", (int)(date.getTime()/1000)), c);
     }
 
     private synchronized void sendTo(String message, Socket c) {
-        sendTo(new Message(message, Type.textMessage, id, "SERVER", dFormat.format(date.getTime())), c);
+        sendTo(new Message(message, Type.textMessage, id, "SERVER", (int)(date.getTime()/1000)), c);
     }
 
     private synchronized void removeDisconnectedClient(String id) {

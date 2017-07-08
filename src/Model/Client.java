@@ -48,11 +48,11 @@ public class Client {
     }
 
     public void send(String content, Type type) throws IOException {
-        send(new Message(content, type, id, clientName, dFormat.format(date.getTime())));
+        send(new Message(content, type, id, clientName, (int)(date.getTime()/1000)));
     }
 
     public void send(String content) throws IOException {
-        send(new Message(content, Type.textMessage, id, clientName, dFormat.format(date.getTime())));
+        send(new Message(content, Type.textMessage, id, clientName, (int)(date.getTime()/1000)));
     }
 
     public DataInputStream getInputStream() throws IOException {
