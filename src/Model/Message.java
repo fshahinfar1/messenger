@@ -10,7 +10,7 @@ public class Message {
 
     private JSONObject message;
 
-    public Message(String content, Type type, String id, String userName, long date) {
+    public Message(String content, Type type, String id, String userName, int date) {
         message = new JSONObject();
         message.put("type", type.name());
         message.put("content", content);
