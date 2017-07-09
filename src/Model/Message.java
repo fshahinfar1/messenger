@@ -58,7 +58,7 @@ public class Message {
     }
 
     public int getMessageDate() {
-        return (int) message.get("date");
+        return Integer.valueOf(((Long)message.get("date")).intValue());
     }
 
     @Override
