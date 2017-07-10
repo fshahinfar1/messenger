@@ -15,17 +15,16 @@ public class UsersData extends DataBaseManager {
     }
 
     public HashMap getUserData(String userName) throws SQLException {
-        // todo: working here ...
-        String sql = "SELECT * FROM " + tableName + " WHERE username=" + "\"" + userName + "\"" + "LIMIT 1";
+        String sql = "SELECT * FROM " + tableName + " WHERE Username=" + "\"" + userName + "\"" + "LIMIT 1";
         ResultSet rs = null;
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
             rs = stmt.executeQuery(sql);
             HashMap<String, String> result = new HashMap<String, String>();
-            result.put("username", rs.getString("username"));
-            result.put("id", rs.getString("id"));
-            result.put("password", rs.getString("password"));
+            result.put("username", rs.getString("Username"));
+            result.put("id", rs.getString("Id"));
+            result.put("password", rs.getString("Password"));
             return result;
         } finally {
             try {
@@ -38,13 +37,13 @@ public class UsersData extends DataBaseManager {
 
     public String getUserName(String id) throws SQLException {
         // todo: working here ...
-        String sql = "SELECT username FROM " + tableName + " WHERE id=" + "\"" + id + "\"" + "LIMIT 1";
+        String sql = "SELECT Username FROM " + tableName + " WHERE Id=" + "\"" + id + "\"" + "LIMIT 1";
         ResultSet rs = null;
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
             rs = stmt.executeQuery(sql);
-            String result = rs.getString("username");
+            String result = rs.getString("Username");
             return result;
         } finally {
             try {
@@ -56,7 +55,7 @@ public class UsersData extends DataBaseManager {
     }
 
     public void insertUserData(String userName, String password, String id) throws SQLException {
-        String sql = String.format("INSERT INTO %s (id, username, password) VALUES(%s,'%s','%s')",
+        String sql = String.format("INSERT INTO %s (Id, Username, Password) VALUES(%s,'%s','%s')",
                 tableName, id, userName, password);
         Statement stmt = connection.createStatement();
         stmt.executeUpdate(sql);

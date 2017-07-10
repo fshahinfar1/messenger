@@ -55,13 +55,13 @@ public class Server {
         id = "SERVER-0";
 //        chatHistory = new File("data/history/" + "fileTest" + ".txt");
         try {
-            db = new UsersData("jdbc:sqlite:data/database/users.db", "users_data");
+            db = new UsersData("jdbc:sqlite:data/database/MessengerDatabase.db", "Users");
         } catch (SQLException e) {
             System.err.println("couldn't connect to db");
             e.printStackTrace();
         }
         try{
-            mhdb = new MessageHistory("jdbc:sqlite:data/database/history.db", "MessageHistory");
+            mhdb = new MessageHistory("jdbc:sqlite:data/database/MessengerDatabase.db", "MessageHistory");
         }catch (SQLException e){
             System.err.println("couldn't connect to mhdb");
             e.printStackTrace();
@@ -294,6 +294,16 @@ public class Server {
                     beforeClosingHandleThread(id, client, userName);
                     return;
                 }// end of createRequest
+            } else if(message.getMessageType() == Type.historyRequest){
+                int requestDate = message.getMessageDate();
+                JSONArray messages = null;
+                try{
+                    messages = mhdb.getMessagesBeforeDate(requestDate);
+                }catch(SQLException e){
+                    System.err.println("*** problem getting messages before date ***");
+                    e.printStackTrace();
+                }
+                sendTo(messages.toString(), Type.historyRequest, client);
             }
         }
     }
@@ -398,6 +408,11 @@ public class Server {
 
     public void stop() {
         System.out.println("Server is shutting down...");
+        try {
+            mhdb.clear();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         this.executor.shutdownNow();
     }
 

@@ -100,6 +100,12 @@ public class MessengerClientController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // ask for history
+        try {
+            user.send("GET", Type.historyRequest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // send button
         sendButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -294,24 +300,7 @@ public class MessengerClientController implements Initializable {
                     // handle messages
                     if (message.getMessageType() == Type.textMessage) {
                         // handles textMessage coming from server
-                        // show author if needed
-                        // todo: it should be by id not by user name
-                        String messageAuthor = message.getMessageAuthor();
-                        if (!messageAuthor.equals(lastAuthor)) {
-                            lastAuthor = messageAuthor;
-                            int baseLine = 0;
-                            if (messageAuthor.equals(user.getClientName())) {
-                                baseLine = 2;
-                            }
-                            showMessage(messageAuthor + "\n", baseLine);
-                        }
-                        // show message
-                        int baseLine = 0;
-                        if (messageAuthor.equals(user.getClientName())) {
-                            baseLine = 2;
-                        }
-                        showMessage(message.getContent(), baseLine);
-
+                        showMessage(message);
                     } else if (message.getMessageType() == Type.clientRequestUserList) {
                         // handles UserList request answer comming form server
                         String arrayString = message.getContent();
@@ -325,12 +314,43 @@ public class MessengerClientController implements Initializable {
                             });
                         } catch (ParseException e) {
                             System.out.println("couldn't parse");
-                            System.out.println(arrayString);
+//                            System.out.println(arrayString);
+                        }
+                    } else if (message.getMessageType() == Type.historyRequest) {
+                        String arrayString = message.getContent();
+                        try {
+                            JSONArray arr = (JSONArray) new JSONParser().parse(arrayString);
+                            for(Object obj: arr){
+                                String json = (String) obj;
+                                showMessage(new Message(json));
+                            }
+                        }catch (ParseException e){
+                            e.printStackTrace();
                         }
                     }
                 }
             }
         });
+    }
+
+    private void showMessage(Message message){
+        // show author if needed
+        // todo: it should be by id not by user name
+        String messageAuthor = message.getMessageAuthor();
+        if (!messageAuthor.equals(lastAuthor)) {
+            lastAuthor = messageAuthor;
+            int baseLine = 0;
+            if (messageAuthor.equals(user.getClientName())) {
+                baseLine = 2;
+            }
+            showMessage(messageAuthor + "\n", baseLine);
+        }
+        // show message
+        int baseLine = 0;
+        if (messageAuthor.equals(user.getClientName())) {
+            baseLine = 2;
+        }
+        showMessage(message.getContent(), baseLine);
     }
 
     private void showMessage(String message, int baseLine) {
