@@ -1,8 +1,8 @@
-package Controller;
+package ir.fshahinfar1.iust.Controller;
 
-import Model.Client;
-import Model.Message;
-import Model.Type;
+import ir.fshahinfar1.iust.Model.Client;
+import ir.fshahinfar1.iust.Model.Message;
+import ir.fshahinfar1.iust.Model.Type;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -295,7 +295,7 @@ public class MessengerLoginController implements Initializable {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass()
                     .getResource("/view/clientMessengerView.fxml"));
             // create controller
-            MessengerClientController controller = new MessengerClientController(user);
+            final MessengerClientController controller = new MessengerClientController(user);
             // connect fxml and controller
             fxmlLoader.setController(controller);
             GridPane root = fxmlLoader.load();

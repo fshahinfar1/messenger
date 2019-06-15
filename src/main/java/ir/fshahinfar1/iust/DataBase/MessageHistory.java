@@ -1,7 +1,7 @@
-package DataBase;
+package ir.fshahinfar1.iust.DataBase;
 
-import Model.Message;
-import Model.Type;
+import ir.fshahinfar1.iust.Model.Message;
+import ir.fshahinfar1.iust.Model.Type;
 import org.json.simple.JSONArray;
 
 import java.sql.ResultSet;

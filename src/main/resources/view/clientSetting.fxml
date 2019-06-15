@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.SettingController">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ir.fshahinfar1.iust.Controller.SettingController">
   <columnConstraints>
       <ColumnConstraints hgrow="ALWAYS" maxWidth="194.0" minWidth="10.0" prefWidth="63.0" />
     <ColumnConstraints hgrow="NEVER" maxWidth="373.0" minWidth="10.0" prefWidth="122.0" />

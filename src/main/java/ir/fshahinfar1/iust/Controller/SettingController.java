@@ -1,6 +1,6 @@
-package Controller;
+package ir.fshahinfar1.iust.Controller;
 
-import Model.Client;
+import ir.fshahinfar1.iust.Model.Client;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;

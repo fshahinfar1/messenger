@@ -1,8 +1,8 @@
-package Controller;
+package ir.fshahinfar1.iust.Controller;
 
-import Model.Client;
-import Model.Message;
-import Model.Type;
+import ir.fshahinfar1.iust.Model.Client;
+import ir.fshahinfar1.iust.Model.Message;
+import ir.fshahinfar1.iust.Model.Type;
 import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import javafx.application.Platform;
@@ -111,7 +111,7 @@ public class MessengerClientController implements Initializable {
         sendButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                String text = chatTextArea.getText() + "\n";
+                final String text = chatTextArea.getText() + "\n";
                 executor.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -135,7 +135,7 @@ public class MessengerClientController implements Initializable {
                 FileChooser fileChooser = new FileChooser();
                 List<File> files = fileChooser.showOpenMultipleDialog(Main.stage);
                 String filePath = null;
-                for (File file : files) {
+                for (final File file : files) {
                     filePath = file.getAbsolutePath();
                     System.out.println(filePath);
                     executor.execute(new Runnable() {
@@ -173,7 +173,7 @@ public class MessengerClientController implements Initializable {
                 if (db.hasFiles()) {
                     success = true;
                     String filePath = null;
-                    for (File file : db.getFiles()) {
+                    for (final File file : db.getFiles()) {
                         filePath = file.getAbsolutePath();
                         System.out.println(filePath);
                         executor.execute(new Runnable() {
@@ -305,7 +305,7 @@ public class MessengerClientController implements Initializable {
                         // handles UserList request answer comming form server
                         String arrayString = message.getContent();
                         try {
-                            JSONArray arr = (JSONArray) new JSONParser().parse(arrayString);
+                            final JSONArray arr = (JSONArray) new JSONParser().parse(arrayString);
                             Platform.runLater(new Runnable() {
                                 @Override
                                 public void run() {
@@ -357,7 +357,7 @@ public class MessengerClientController implements Initializable {
         // create label
         Label messageLabel = new Label(message);
         // pack in HBox
-        HBox hBox = new HBox();
+        final HBox hBox = new HBox();
         hBox.setPrefWidth(350);
         hBox.getChildren().add(messageLabel);
         if (baseLine == 0) {

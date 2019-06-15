@@ -1,4 +1,4 @@
-package Controller;
+package ir.fshahinfar1.iust.Controller;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -17,7 +17,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         this.stage = stage;
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/view/clientMessengerLogin.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass()
+                        .getResource("/view/clientMessengerLogin.fxml"));
         Parent root = fxmlLoader.load();
         // TODO: FIX ICON PROBLEM
         stage.getIcons().add(new Image("file:/data/resource/img/ICON.png"));

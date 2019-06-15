@@ -1,4 +1,4 @@
-package Model;
+package ir.fshahinfar1.iust.Model;
 
 import java.io.*;
 import java.net.ConnectException;

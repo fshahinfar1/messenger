@@ -1,4 +1,4 @@
-package Controller;
+package ir.fshahinfar1.iust.Controller;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -16,7 +16,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ResourceBundle;
 
-import Model.Server;
+import ir.fshahinfar1.iust.Model.Server;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 

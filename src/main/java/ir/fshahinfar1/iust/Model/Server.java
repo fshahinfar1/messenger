@@ -1,8 +1,8 @@
-package Model;
+package ir.fshahinfar1.iust.Model;
 
-import DataBase.DataBaseManager;
-import DataBase.MessageHistory;
-import DataBase.UsersData;
+import ir.fshahinfar1.iust.DataBase.DataBaseManager;
+import ir.fshahinfar1.iust.DataBase.MessageHistory;
+import ir.fshahinfar1.iust.DataBase.UsersData;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import javafx.application.Platform;

@@ -1,4 +1,4 @@
-package DataBase;
+package ir.fshahinfar1.iust.DataBase;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

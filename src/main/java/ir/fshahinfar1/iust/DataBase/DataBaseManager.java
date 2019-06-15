@@ -1,4 +1,4 @@
-package DataBase;
+package ir.fshahinfar1.iust.DataBase;
 
 import javax.xml.crypto.Data;
 import java.sql.*;
@@ -59,7 +59,8 @@ public class DataBaseManager {
     }
 
     public static void main(String[] args) throws SQLException {
-        DataBaseManager db = new DataBaseManager("jdbc:sqlite:data/database/users.db", "users_data");
+        DataBaseManager db = new DataBaseManager(
+                        "jdbc:sqlite:/database/users.db", "users_data");
 //        db.selectAll();
 //        try {
 ////            HashMap<String, String> hm = db.getUserData("Farbod0");
